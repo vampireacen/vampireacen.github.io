@@ -218,15 +218,20 @@
 
 </div>
 
-<h3 id="patches-linear-projection-of-flattened-patches">Patches &amp; Linear Projection of Flattened Patches</h3>
 <div id="patch_linear">
+
+### Patches &amp; Linear Projection of Flattened Patches
+
 
 由于<strong>标准的transformer模块</strong>要求输入的是一个<strong>token</strong>序列，而一张图片并不是一个序列，把图像分块（<strong>patches</strong>），由块来组成序列，对于$2D$图像$x\in \mathbb{R}^{H×W×C}$将其分为$P \times P$的 <strong>patches</strong>，$x_p\in \mathbb{R}^{N\times(P^2\cdot C)}$，共分成N个，$N = HW/P^2$，最终获得$N$个 $P^2 \cdot C$特征大小的向量(<strong>768</strong>)。在代码实现中直接用一个卷积层来实现的，以为<strong>Vit-B 16</strong>为例，使用卷积核<strong>kernal size</strong>为$16 \times 16$，<strong>stride</strong>为$16$，卷积核个数为$768$来实现，以$224 \times 224 \times 3$($H  W$为224，的$RGB$ $3 channel$)为例：
 $H  W$为<strong>224</strong>的图片 分成 $H  W$为<strong>16</strong> 的<strong>patches</strong> $\frac{224 \times 224}{16\times16}$共可以分成<strong>196</strong>（$14 \times 14$）个<strong>patch</strong>，每个<strong>patch</strong>依然是<strong>3</strong>个<strong>channel</strong>，所以对于每一个patch的维度为为<strong>768</strong>（$16 \times16 \times 3$），一张$H$为224，$W$为224的图片生成一个$[196\times768]$的二维<strong>token</strong>矩阵。
+
 </div>
 
-<h3 id="position-embedding-token">Position Embedding &amp; token</h3>
 <div id="pe_token">
+
+### Position Embedding &amp; token
+
 
 对应的每一个patch生成一个<strong>token</strong>，每个<strong>token</strong>都是768维（$[196\times768]$），在所有<strong>token</strong>前面需要<strong>拼接</strong>一个$[1\times768]$可训练的<strong>class token</strong>（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$
 
@@ -269,14 +274,170 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 </ul>
 <p></div></p>
 <h2 id="swin-transformer-swint-">Swin Transformer(SwinT)</h2>
-<p><img src="./img/swin_VS_VIT.jpg" alt="swin">
-<img src="./img/swint.jpg" alt="swin">
+<h3 id="swint-vs-vit">SwinT VS ViT</h3>
+<div align=center>
+
+<img src="./img/swin_VS_VIT.jpg" alt="swin">
+
+</div>
+
+<ul>
+<li>特征层的下采样倍率不同，<strong>Swin Transformer</strong>的特征层先经过$4$倍下采样，再经过$8$倍下采样，最后是$16$倍下采样，<strong>ViT</strong>中最开始经过一个$16$倍下采样，之后的所有层都是保持这个$16$倍。可以融合不同倍率特征层的特征。</li>
+<li><strong>Swin Transformer</strong>中的特征层都是被一个一个的小 <a href="#W_SW">Window</a> 给分割开了，<strong>ViT</strong> 则是整个特征层没有被分割。</li>
+</ul>
+<h3 id="swin-transformer-">Swin Transformer 结构</h3>
+<div align=center>
+
+<img src="./img/SwinT.png" alt="swin">
+
+</div>
+
+<h4 id="architecture">Architecture</h4>
+<p>$H\times W \times 3$ 的图像经过 <strong>Patch Partition</strong> 和 <strong>Linear Embedding（Layer Normal）</strong>，变成$\frac{H}{4} \times \frac{W}{4} \times 48$，再经过<strong>Stage1</strong>变为$\frac{H}{4} \times \frac{W}{4} \times C$，再由<strong>Stage2</strong>变成$\frac{H}{8} \times \frac{W}{8} \times 2C$，再经过<strong>Stage3</strong>、<strong>Stage4</strong>变成$\frac{H}{16} \times \frac{W}{16} \times 4C$、$\frac{H}{32} \times \frac{W}{32} \times 8C$，每经过一个 <a href="#patch_merge">Patch Merging</a> 图像宽高缩减为原来的 <font color="#d71345">一半</font> ，<strong>channel</strong> 变为原来的<font color="#d71345">2倍</font>，<strong>Stage1</strong>由<strong>Linear Embedding</strong>和$2$个<strong>Swin Transformer Block</strong>堆叠而成，而后面的<strong>Stage</strong>均是由<strong>Patch Merging</strong>和 <font color="#d71345">偶数个</font> <strong>Swin Transformer Block</strong>堆叠而成。</p>
+<p>偶数个是因为，<strong>Swin Transformer Block</strong>的第一个<strong>block</strong>中<strong>Self Attention</strong>的是<a href="#W_MSA">Window Multi-Head Self Attention</a>(右图中的<font color="#d71345">W-MSA</font>),第二个<strong>block</strong>中<strong>Self Attention</strong>的是<a href="#SW_MSA">Shifted-Window Multi-Head Self Attention</a>(右图中的<font color="#d71345">SW-MSA</font>)</p>
+<h4 id="patch-partition-linear-embedding">Patch Partition &amp; Linear Embedding</h4>
+<p><strong>Patch Partition</strong>如上图，$H\times W \times 3$的图像被一个$4 \times 4$大小的窗口分割，每个窗口内分成$16$个<strong>patch</strong>，然后<strong>patch</strong>延<strong>channel</strong>方向进行$Concat$，所以$H\times W \times 3$的图像经过<strong>Patch Partition</strong>宽高变成原来的$\frac{1}{4}$，<strong>channel</strong>由3变成48($3 \times 16$)</p>
+<p><strong>Linear Embedding（Layer Normal）</strong>，经过<strong>Patch Partition</strong>后再通过一个线性层对channel进行调整，调整成图中的$C$（具体的$C$根据，<strong>Swin-Tiny、Swin-Small、Swin-Base、Swin-Large</strong>有所不同）。</p>
+<p>实现：<strong>Patch Partition</strong> 和 <strong>Linear Embedding</strong>都是通过卷积层实现的，<strong>kernal size</strong> 为 $4 \times 4$，<strong>stride</strong> 为 $4$， <strong>channel</strong> 为 $48$，类似于ViT中的<a href="#patch_linear">Patches &amp; Linear Projection of Flattened Patches</a>，还要经过一层<strong>LayerNorm</strong></p>
+<div id="patch_merge"></div>
+
+<h3 id="patch-merging">Patch Merging</h3>
+<div align=center>
+
 <img src="./img/patch_merge.png" alt="swin">
+
+</div>
+
+<p>如上图，一个$4\times 4$大小的窗口，按位置进行拆分，如上原图中<strong>蓝、黄、绿、红</strong>对应位置的元素，进行拆分合并成<strong>蓝、黄、绿、红</strong>的$2 \times 2$大小的小窗口给，然后在<strong>channel</strong>方向上进行$Concat$，再经过一个<strong>LayerNorm</strong>后，通过一个全连接层将<strong>channel</strong>整合成原图的<font color="#d71345">2倍</font>，宽高变为原来的<font color="#d71345">1半</font>。类似于<a href="#focus">Focus</a>操作。</p>
+<p>这里的全连接层Linear是<strong>权值共享</strong>的</p>
+<div id="W_SW">
+
+### Window &amp; Shifted Window
+
+<div id="W_MSA">
+
+#### W-MSA
+
+<div align=center>
+
+<img src="./img/W_MSA.png" alt="swin">
+
+</div>
+
+<p>对于普通的<strong>Multi-Head Self Attention</strong>的每一个<strong>token</strong>都会去计算$Q,K,V$，$QK^T$运算完之后再去与&amp;V&amp;联系，每一个<strong>token</strong>都会与所有的<strong>token</strong>去进行沟通。</p>
+<p><strong>Window Multi-Head Self Attention</strong> 把特征图进行分块，每个块内部去进行<strong>Self Attention</strong>，这样做的有点是减少了计算量，但是其缺点是只能块内进行沟通，但是块和块之间是无法通信的。
+</div></p>
+<div id="SW_MSA">
+
+#### SW-MSA
+
+<strong>Shifted-Window Multi-Head Self Attention</strong> 解决了 <strong>Window Multi-Head Self Attention</strong> 块与块之间无法通讯的问题。
+
+<div align=center>
+
 <img src="./img/shifted_window.png" alt="swin">
+
+</div>
+
+<p>如上图，对于 <strong>W-MSA</strong> 中的Window向下向右偏移了两个 <strong>patch</strong>，生成了一个新的 <strong>Window</strong>（上图中<strong>Layer+1</strong> 所示），这个新的 <strong>Window</strong> 就是 <strong>SW-MSA</strong>，对于<strong>Layer+1</strong>中的上方中间的 <strong>Window</strong>，融合了 <strong>Layer</strong> 中的上面两个 <strong>Window</strong> ，对应<strong> Layer+1</strong> 中左侧中间的<strong> Window</strong> 融合了<strong>Layer</strong>中的左侧两个 <strong>Window</strong>，对于<strong>Layer+1</strong>中的中间大的 <strong>Window</strong> 融合了 <strong>Layer</strong> 中的所有四个<strong>Window</strong>，其他<strong>Window</strong>依次类推。这样就解决了 <strong>W-MSA</strong> Window之间无法通讯的问题。</p>
+<p>但是这样<strong>SW-MSA</strong>分成$9$个<strong>window</strong>是不利于并行计算的，不像<strong>W-MSA</strong>每一个<strong>Window</strong>都是一个$4\times4$大小的，作者提出了一个方法来解决这个问题：</p>
+<div align=center>
+
 <img src="./img/shifted_window_2.png" alt="swin">
+
+</div>
+
+<p>对于$9$个Window标记为$0\sim8$，先将上边的$0,1,2$(图中标记的$A，C$)整体移动到下边，如下图：</p>
+<div align=center>
+
 <img src="./img/shifted_window_3.png" alt="swin">
-<img src="./img/shifted_window_4.png" alt="swin"></p>
-<h2 id="swin"><img src="./img/shifted_window_5.png" alt="swin"></h2>
+
+</div>
+
+<p>对于移动后的新的特征图，再把左侧的$3,6,0$(图中标记的$B,A$)整体移动到左边，这样就又组成了一个新的$4\times 4$的特征图，($5$和$3$看作一个整体，$7$和$1$看作一个整体，$8、6、2、0$看作一个整体)，这样就又可以做$4\times4$的并行计算了如下图：</p>
+<div align=center>
+
+<img src="./img/shifted_window_4.png" alt="swin">
+
+</div>
+
+<p>但是这样又会有一个新问题，即 $5$ 和 $3$原本是不相邻的，把他们强行划到同一个 $4\times4$ 的Window中去做 <strong>Self Attention</strong>是不对的，$5$ 和 $3$应该在自己的 <strong>Window</strong> 内去进行 <strong>Self Attention</strong> (其他Window类似)，解决方法如下：</p>
+<div align=center>
+
+<img src="./img/shifted_window_5.png" alt="swin">
+
+</div>
+
+
+<p>对$5$ 和 $3$ 中的每一个 <strong>patch</strong> 标记为 $0\sim15$，对于 $patch_0$ 的 $q_0$ 对其他所有 <strong>patch</strong> 的 $k_i$ 做点积生成 $\alpha_{0,0}$,$\alpha_{0,1}$,……,$\alpha_{0,15}$ ，对于跟 $patch_0$ 不在同一个区域中的 patch 的点积结果如图中<strong>蓝色方框内的$\alpha$</strong>，先减去100再做 $softmax$，这样这些 $\alpha$ 经过 $softmax$ 之后就会变为0，一个很大的负数取 $exp$ 结果趋于 $0$，这样就会只做同一区域内的 <strong>Self Attention</strong>，计算结束后再还原会原来的位置即可。</p>
+<p></div>
+</div></p>
+<h3 id="relative-position-bias">Relative position bias</h3>
+<div id="rpb">
+
+<div align=center>
+
+<strong>$Attention(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}} + B)V$</strong>
+
+</div>
+
+<p>与普通的 <strong>Attention</strong> 相比，$\frac{QK^T}{\sqrt{d_k}}$先加$B$，在进行$softmax$，这个$B$就是 <strong>Relative position bias</strong>（相对位置偏置）</p>
+<div align=center>
+
+<img src="./img/relative_position_bias_1.png" alt="swin">
+
+</div>
+
+<p>对于一个$2\times2$的 <strong>feature map</strong>，分别以不同颜色<strong>蓝、黄、红、绿</strong>标识，以<strong>蓝色</strong>为例，当以<strong>蓝色</strong>为基准去计算其他位置的索引时，其他位置的行列坐标减去蓝色的坐标即为关于蓝色的位置索引，然后进行 $flatten$，再把所有位置的 $flatten$ 的索引 $Concat$ 成一个相对位置矩阵。但是作者使用的并不是二维的位置索引，而是一维的位置索引，变化如下图：</p>
+<div align=center>
+
+<img src="./img/relative_position_bias_2.png" alt="swin">
+
+</div>
+
+<p>偏移从 $0$ 开始，行列坐标加上 $M-1$ ，这里的 $M$ 是 <strong>feature map</strong> 的 大小 这里是 $2$， $M-1$ 为 $1$</p>
+<div align=center>
+
+<img src="./img/relative_position_bias_3.png" alt="swin">
+
+</div>
+
+<p>再行列坐标乘上$2M-1$</p>
+<ul>
+<li>Q:为什么是$2M-1$ ？</li>
+<li>A：对于$2\times2$的feature map，其他位置关于基准位置的索引从 $-M + 1 \sim M - 1$ ,以蓝色位列可以去到的最极端的索引为$(-1,-1)$，而对于绿色的来说可以取到的最极端的索引为$(1，1)$，所以对于$2\times2$的 feature map 索引范围是$[-1,0,1]$，二维索引即$[-1,0,1]$的排列组合共有$9$个，即$(2M-1)^2$个。</li>
+</ul>
+<div align=center>
+
+<img src="./img/relative_position_bias_4.png" alt="swin">
+
+</div>
+
+<p>然后再行列坐标相加，变成一维的 <strong>位置索引</strong> 。</p>
+<div align=center>
+
+<img src="./img/relative_position_bias_5.png" alt="swin">
+
+</div>
+
+<p>注意上面是 <strong>位置索引</strong> 而不是 <strong>位置偏置</strong> ，需要拿对应的<strong>位置索引</strong> 去 <strong>相对位置偏置表(Relative position bias table)</strong> 中去取对应的 <strong>相对位置偏置</strong> 即 <strong>Attention</strong> 中的 $B$。</p>
+<p></div></p>
+<h3 id="swin-t-s-b-l-">Swin-T/S/B/L 区别</h3>
+<div align=center>
+
+<img src="./img/Swin_TSBL.png" alt="swin">
+
+</div>
+
+<ul>
+<li><strong>win. sz.</strong> 是指 <strong>Swin Transformer Block</strong> 中的 <strong>Window</strong> 大小，这里四个模型的任何阶段均相同。</li>
+<li><strong>dim</strong> 是指经过每个 <strong>Stage</strong> 后输出的维度</li>
+<li><strong>head</strong> 是指 <strong>Swin Transformer Block</strong> 中头的个数</li>
+<li><strong>S、B、L</strong> 中 <strong>Stage3</strong> 都是堆叠了$18$个 <strong>block</strong></li>
+<li><strong>T、S</strong> 除了 <strong>Stage3</strong> 的堆叠次数外完全一样</li>
+<li><strong>S、B、L</strong> 的 <strong>Stage1</strong> 的 <strong>dim</strong> 分别是$96，128，192$，之后的每一个 <strong>Stage</strong> 的 <strong>dim</strong> 都是之前两倍</li>
+</ul>
+<hr>
 <div id="cnn"></div>
 
 <h1 id="cnn-">CNN主干网络</h1>
@@ -299,6 +460,8 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 <h4 id="yolov3-spp">Yolov3 spp</h4>
 <h4 id="yolov4">Yolov4</h4>
 <h4 id="yolov5">Yolov5</h4>
+<div id="focus"></div>
+
 <hr>
 <h1 id="rnn-">RNN系列</h1>
 <h2 id="rnn">RNN</h2>
