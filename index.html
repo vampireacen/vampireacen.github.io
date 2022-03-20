@@ -209,8 +209,65 @@
 <li><strong>Transformer</strong> 的重点是 <strong>Self-Attention</strong> 结构，其中用到的 $Q, K, V$ 矩阵通过输出进行线性变换得到。</li>
 <li><strong>Transformer</strong> 中 <strong>Multi-Head Attention</strong> 中有多个 <strong>Self-Attention</strong>，可以捕获单词之间多种维度上的相关系数 <strong>attention score</strong>。</li>
 </ul>
+<hr>
 <h2 id="vision-transformer-vit-">Vision Transformer(ViT)</h2>
-<p><img src="./img/vit.png" alt="Vit"></p>
+<div id="vit">
+<div align=center>
+
+<img src="./img/vit.png" alt="Vit">
+
+</div>
+
+<h3 id="patches-linear-projection-of-flattened-patches">Patches &amp; Linear Projection of Flattened Patches</h3>
+<div id="patch_linear">
+
+由于<strong>标准的transformer模块</strong>要求输入的是一个<strong>token</strong>序列，而一张图片并不是一个序列，把图像分块（<strong>patches</strong>），由块来组成序列，对于$2D$图像$x\in \mathbb{R}^{H×W×C}$将其分为$P \times P$的 <strong>patches</strong>，$x_p\in \mathbb{R}^{N\times(P^2\cdot C)}$，共分成N个，$N = HW/P^2$，最终获得$N$个 $P^2 \cdot C$特征大小的向量(<strong>768</strong>)。在代码实现中直接用一个卷积层来实现的，以为<strong>Vit-B 16</strong>为例，使用卷积核<strong>kernal size</strong>为$16 \times 16$，<strong>stride</strong>为$16$，卷积核个数为$768$来实现，以$224 \times 224 \times 3$($H  W$为224，的$RGB$ $3 channel$)为例：
+$H  W$为<strong>224</strong>的图片 分成 $H  W$为<strong>16</strong> 的<strong>patches</strong> $\frac{224 \times 224}{16\times16}$共可以分成<strong>196</strong>（$14 \times 14$）个<strong>patch</strong>，每个<strong>patch</strong>依然是<strong>3</strong>个<strong>channel</strong>，所以对于每一个patch的维度为为<strong>768</strong>（$16 \times16 \times 3$），一张$H$为224，$W$为224的图片生成一个$[196\times768]$的二维<strong>token</strong>矩阵。
+</div>
+
+<h3 id="position-embedding-token">Position Embedding &amp; token</h3>
+<div id="pe_token">
+
+对应的每一个patch生成一个<strong>token</strong>，每个<strong>token</strong>都是768维（$[196\times768]$），在所有<strong>token</strong>前面需要<strong>拼接</strong>一个$[1\times768]$可训练的<strong>class token</strong>（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$
+
+$[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embedding</strong> <strong>添加</strong> 可训练的位置信息$[196\times768] \longrightarrow [196\times768]$，对于使用1D、2D、相对位置编码效果其实相差很小，但是使用位置编码对比不适用位置编码的效果还是很明显:
+<div align=center>
+
+<img src="./img/pe.png" alt="Vit">
+
+</div>
+
+
+<p></div></p>
+<h3 id="transformer-encoder">Transformer Encoder</h3>
+<div align=center>
+
+<img src="./img/transform_encoder.png" alt="Vit">
+
+</div>
+
+<p>首先Vit中没有<strong>Decoder</strong>，只有<strong>Transformer Encoder</strong>，<strong>Encoder block</strong>也有几点与标准<strong>transformer block</strong>有差别：</p>
+<ul>
+<li><strong>Vit</strong>中的<strong>Norm</strong>在<strong>Multi-Head Attention</strong>前面，标准<strong>Transformer</strong>中<strong>Norm</strong>在后面，这样做的好处是<strong>Norm</strong>在前面可以加速模型训练</li>
+<li>在<strong>Multi-Head Attention</strong>与<strong>Add</strong>之间有一个<strong>dropout/dropPath</strong>，图中并没有显示出来</li>
+</ul>
+<h3 id="mlp-head">MLP head</h3>
+<p>标准的<strong>transformer</strong>中最后的预测因为masked的关系，所以每个每个向量只与他前面的向量有关，每个向量负责预测他当前位置的值。而<strong>Vit</strong>中只需要预测类别，即$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$中的$[1 \times 768]$，所以只预测新拼接的第$0$个<strong>token</strong>即可</p>
+<h3 id="vit-base-large-huge-">ViT-Base、Large、Huge的区别</h3>
+<div align=center>
+
+<img src="./img/BLH.png" alt="Vit">
+
+</div>
+
+<ul>
+<li><strong>Patch Size</strong>是指，<strong>patch</strong>大小，<strong>patch size</strong>越小 则 <strong>patch</strong> 越多</li>
+<li><strong>Layer</strong>s是指，<strong>Transformer Encoder</strong> 中 堆叠 <strong>Encoder Block</strong> 的次数</li>
+<li><strong>Hidden Size</strong>是通过<strong>Embedding</strong>层后每个<strong>token</strong>的<strong>dim</strong>（向量的长度），也是卷积核的个数</li>
+<li><strong>MLP size</strong>是<strong>Transformer Encoder</strong>中<strong>MLP Block</strong>第一个全连接的节点个数（是<strong>Hidden Size</strong>的四倍）</li>
+<li><strong>Heads</strong>代表<strong>Transformer</strong>中<strong>Multi-Head Attention</strong>的<strong>heads</strong>数</li>
+</ul>
+<p></div></p>
 <h2 id="swin-transformer-swint-">Swin Transformer(SwinT)</h2>
 <p><img src="./img/swin_VS_VIT.jpg" alt="swin">
 <img src="./img/swint.jpg" alt="swin">

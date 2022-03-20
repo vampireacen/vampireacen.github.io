@@ -161,8 +161,65 @@ $X_{(n,d)}$经过**multi-head self attention、add & norm 、feed forward**之�
 ---
 
 ## Vision Transformer(ViT)
+<div id="vit">
+<div align=center>
 
 ![Vit](./img/vit.png)
+
+</div>
+
+### Patches & Linear Projection of Flattened Patches
+<div id="patch_linear">
+
+由于**标准的transformer模块**要求输入的是一个**token**序列，而一张图片并不是一个序列，把图像分块（**patches**），由块来组成序列，对于$2D$图像$x\in \mathbb{R}^{H×W×C}$将其分为$P \times P$的 **patches**，$x_p\in \mathbb{R}^{N\times(P^2\cdot C)}$，共分成N个，$N = HW/P^2$，最终获得$N$个 $P^2 \cdot C$特征大小的向量(**768**)。在代码实现中直接用一个卷积层来实现的，以为**Vit-B 16**为例，使用卷积核**kernal size**为$16 \times 16$，**stride**为$16$，卷积核个数为$768$来实现，以$224 \times 224 \times 3$($H  W$为224，的$RGB$ $3 channel$)为例：
+$H  W$为**224**的图片 分成 $H  W$为**16** 的**patches** $\frac{224 \times 224}{16\times16}$共可以分成**196**（$14 \times 14$）个**patch**，每个**patch**依然是**3**个**channel**，所以对于每一个patch的维度为为**768**（$16 \times16 \times 3$），一张$H$为224，$W$为224的图片生成一个$[196\times768]$的二维**token**矩阵。
+</div>
+
+### Position Embedding & token
+<div id="pe_token">
+
+对应的每一个patch生成一个**token**，每个**token**都是768维（$[196\times768]$），在所有**token**前面需要**拼接**一个$[1\times768]$可训练的**class token**（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$
+
+$[196\times768]$ **token** 矩阵再经过**Position Embedding** **添加** 可训练的位置信息$[196\times768] \longrightarrow [196\times768]$，对于使用1D、2D、相对位置编码效果其实相差很小，但是使用位置编码对比不适用位置编码的效果还是很明显:
+<div align=center>
+
+![Vit](./img/pe.png)
+
+</div>
+
+
+</div>
+
+### Transformer Encoder
+<div align=center>
+
+![Vit](./img/transform_encoder.png)
+
+</div>
+
+首先Vit中没有**Decoder**，只有**Transformer Encoder**，**Encoder block**也有几点与标准**transformer block**有差别：
+* **Vit**中的**Norm**在**Multi-Head Attention**前面，标准**Transformer**中**Norm**在后面，这样做的好处是**Norm**在前面可以加速模型训练
+* 在**Multi-Head Attention**与**Add**之间有一个**dropout/dropPath**，图中并没有显示出来
+
+### MLP head
+
+标准的**transformer**中最后的预测因为masked的关系，所以每个每个向量只与他前面的向量有关，每个向量负责预测他当前位置的值。而**Vit**中只需要预测类别，即$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$中的$[1 \times 768]$，所以只预测新拼接的第$0$个**token**即可
+
+### ViT-Base、Large、Huge的区别
+<div align=center>
+
+![Vit](./img/BLH.png)
+
+</div>
+
+* **Patch Size**是指，**patch**大小，**patch size**越小 则 **patch** 越多
+* **Layer**s是指，**Transformer Encoder** 中 堆叠 **Encoder Block** 的次数
+* **Hidden Size**是通过**Embedding**层后每个**token**的**dim**（向量的长度），也是卷积核的个数
+* **MLP size**是**Transformer Encoder**中**MLP Block**第一个全连接的节点个数（是**Hidden Size**的四倍）
+* **Heads**代表**Transformer**中**Multi-Head Attention**的**heads**数
+
+</div>
+
 ## Swin Transformer(SwinT)
 ![swin](./img/swin_VS_VIT.jpg)
 ![swin](./img/swint.jpg)
