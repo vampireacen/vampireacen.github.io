@@ -55,6 +55,13 @@
 
 		.highlight { background-color: #ffffcc } /* RIGHT */
 		</style>
+		<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>        
+  
+		<script type="text/x-mathjax-config">
+		MathJax.Hub.Config({
+		  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+		});
+		</script>
   </head>
   <body>
 	  <div>
@@ -108,9 +115,7 @@
 </ul>
 <p></div></p>
 <h3 id="encoder">Encoder</h3>
-<div id="encoder">
-#### Multi-Head self-Attention
-
+<h4 id="multi-head-self-attention">Multi-Head self-Attention</h4>
 <div align=center> 
 
 <strong>$Attention(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}})V$</strong>
@@ -163,8 +168,7 @@
 
 </div>
 
-<p>$X_{(n,d)}$经过<strong>multi-head self attention、add &amp; norm 、feed forward</strong>之后输入$O_{(n,d)}$
-</div></p>
+<p>$X_{(n,d)}$经过<strong>multi-head self attention、add &amp; norm 、feed forward</strong>之后输入$O_{(n,d)}$</p>
 <h3 id="decoder">Decoder</h3>
 <h4 id="masked-multi-head-self-attention">Masked Multi-Head Self Attention</h4>
 <p><strong>Decoder</strong>中的第一个<strong>multi-head self attention</strong>为 <strong><em>Masked</em></strong>  <strong>multi-head self attention</strong>，所谓<strong>mask</strong>是一个$n * n$的下三角矩阵如图：<a href="https://zhuanlan.zhihu.com/p/338817680">https://zhuanlan.zhihu.com/p/338817680</a></p>
@@ -310,14 +314,12 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 
 <p>如上图，一个$4\times 4$大小的窗口，按位置进行拆分，如上原图中<strong>蓝、黄、绿、红</strong>对应位置的元素，进行拆分合并成<strong>蓝、黄、绿、红</strong>的$2 \times 2$大小的小窗口给，然后在<strong>channel</strong>方向上进行$Concat$，再经过一个<strong>LayerNorm</strong>后，通过一个全连接层将<strong>channel</strong>整合成原图的<font color="#d71345">2倍</font>，宽高变为原来的<font color="#d71345">1半</font>。类似于<a href="#focus">Focus</a>操作。</p>
 <p>这里的全连接层Linear是<strong>权值共享</strong>的</p>
-<div id="W_SW">
+<div id="W_SW"></div>
 
-### Window &amp; Shifted Window
+<h3 id="window-shifted-window">Window &amp; Shifted Window</h3>
+<div id="W_MSA"></div>
 
-<div id="W_MSA">
-
-#### W-MSA
-
+<h4 id="w-msa">W-MSA</h4>
 <div align=center>
 
 <img src="./img/W_MSA.png" alt="swin">
@@ -325,14 +327,11 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 </div>
 
 <p>对于普通的<strong>Multi-Head Self Attention</strong>的每一个<strong>token</strong>都会去计算$Q,K,V$，$QK^T$运算完之后再去与&amp;V&amp;联系，每一个<strong>token</strong>都会与所有的<strong>token</strong>去进行沟通。</p>
-<p><strong>Window Multi-Head Self Attention</strong> 把特征图进行分块，每个块内部去进行<strong>Self Attention</strong>，这样做的有点是减少了计算量，但是其缺点是只能块内进行沟通，但是块和块之间是无法通信的。
-</div></p>
-<div id="SW_MSA">
+<p><strong>Window Multi-Head Self Attention</strong> 把特征图进行分块，每个块内部去进行<strong>Self Attention</strong>，这样做的有点是减少了计算量，但是其缺点是只能块内进行沟通，但是块和块之间是无法通信的。</p>
+<div id="SW_MSA"></div>
 
-#### SW-MSA
-
-<strong>Shifted-Window Multi-Head Self Attention</strong> 解决了 <strong>Window Multi-Head Self Attention</strong> 块与块之间无法通讯的问题。
-
+<h4 id="sw-msa">SW-MSA</h4>
+<p><strong>Shifted-Window Multi-Head Self Attention</strong> 解决了 <strong>Window Multi-Head Self Attention</strong> 块与块之间无法通讯的问题。</p>
 <div align=center>
 
 <img src="./img/shifted_window.png" alt="swin">
@@ -370,8 +369,6 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 
 
 <p>对$5$ 和 $3$ 中的每一个 <strong>patch</strong> 标记为 $0\sim15$，对于 $patch_0$ 的 $q_0$ 对其他所有 <strong>patch</strong> 的 $k_i$ 做点积生成 $\alpha_{0,0}$,$\alpha_{0,1}$,……,$\alpha_{0,15}$ ，对于跟 $patch_0$ 不在同一个区域中的 patch 的点积结果如图中<strong>蓝色方框内的$\alpha$</strong>，先减去100再做 $softmax$，这样这些 $\alpha$ 经过 $softmax$ 之后就会变为0，一个很大的负数取 $exp$ 结果趋于 $0$，这样就会只做同一区域内的 <strong>Self Attention</strong>，计算结束后再还原会原来的位置即可。</p>
-<p></div>
-</div></p>
 <h3 id="relative-position-bias">Relative position bias</h3>
 <div id="rpb">
 

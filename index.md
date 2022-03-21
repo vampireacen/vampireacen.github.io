@@ -44,7 +44,7 @@
 </div>
 
 ### Encoder
-<div id="encoder">
+
 #### Multi-Head self-Attention
 
 <div align=center> 
@@ -104,7 +104,7 @@
 </div>
 
 $X_{(n,d)}$经过**multi-head self attention、add & norm 、feed forward**之后输入$O_{(n,d)}$
-</div>
+
 
 ### Decoder
 
@@ -271,11 +271,11 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 
 这里的全连接层Linear是**权值共享**的
 
-<div id="W_SW">
+<div id="W_SW"></div>
 
 ### Window & Shifted Window
 
-<div id="W_MSA">
+<div id="W_MSA"></div>
 
 #### W-MSA
 
@@ -288,9 +288,9 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 对于普通的**Multi-Head Self Attention**的每一个**token**都会去计算$Q,K,V$，$QK^T$运算完之后再去与&V&联系，每一个**token**都会与所有的**token**去进行沟通。
 
 **Window Multi-Head Self Attention** 把特征图进行分块，每个块内部去进行**Self Attention**，这样做的有点是减少了计算量，但是其缺点是只能块内进行沟通，但是块和块之间是无法通信的。
-</div>
 
-<div id="SW_MSA">
+
+<div id="SW_MSA"></div>
 
 #### SW-MSA
 
@@ -338,8 +338,8 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 
 对$5$ 和 $3$ 中的每一个 **patch** 标记为 $0\sim15$，对于 $patch_0$ 的 $q_0$ 对其他所有 **patch** 的 $k_i$ 做点积生成 $\alpha_{0,0}$,$\alpha_{0,1}$,……,$\alpha_{0,15}$ ，对于跟 $patch_0$ 不在同一个区域中的 patch 的点积结果如图中**蓝色方框内的$\alpha$**，先减去100再做 $softmax$，这样这些 $\alpha$ 经过 $softmax$ 之后就会变为0，一个很大的负数取 $exp$ 结果趋于 $0$，这样就会只做同一区域内的 **Self Attention**，计算结束后再还原会原来的位置即可。
 
-</div>
-</div>
+
+
 
 
 ### Relative position bias
