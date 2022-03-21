@@ -417,6 +417,17 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 
 # CNN主干网络
 ## CNN基础
+## AlexNet
+## VGGNet
+## GoogLeNet
+### Incetption v1
+### Incetption v2
+### Incetption v3
+### Incetption v4
+## ResNet
+## ResNeXt
+## MobileNet
+## DenseNet
 ---
 # 目标检测主流模型
 ## Two Stage
