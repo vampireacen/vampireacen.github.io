@@ -5,6 +5,11 @@
 </font>
 </div>
 
+# 前言
+
+本文中所使用 PPT 截图皆来自于导师[b站up主：霹雳吧啦Wz](https://space.bilibili.com/18161609)。
+文中如有不妥地方，欢迎留言指正！
+
 # Transformer主干网络
 
 ## Transformer
@@ -45,7 +50,7 @@
 
 ### Encoder
 
-#### Multi-Head self-Attention
+#### Multi-Head self-[Attention](#attn)
 
 <div align=center> 
 
@@ -250,6 +255,8 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 
 偶数个是因为，**Swin Transformer Block**的第一个**block**中**Self Attention**的是[Window Multi-Head Self Attention](#W_MSA)(右图中的<font color="#d71345">W-MSA</font>),第二个**block**中**Self Attention**的是[Shifted-Window Multi-Head Self Attention](#SW_MSA)(右图中的<font color="#d71345">SW-MSA</font>)
 
+<div id="pp_le"></div>
+
 #### Patch Partition & Linear Embedding
 **Patch Partition**如上图，$H\times W \times 3$的图像被一个$4 \times 4$大小的窗口分割，每个窗口内分成$16$个**patch**，然后**patch**延**channel**方向进行$Concat$，所以$H\times W \times 3$的图像经过**Patch Partition**宽高变成原来的$\frac{1}{4}$，**channel**由3变成48($3 \times 16$)
 
@@ -412,33 +419,657 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 * **T、S** 除了 **Stage3** 的堆叠次数外完全一样
 * **S、B、L** 的 **Stage1** 的 **dim** 分别是$96，128，192$，之后的每一个 **Stage** 的 **dim** 都是之前两倍
 
+### [Swin Transformer Object Detection](#swinod)
+
 ---
 <div id="cnn"></div>
 
 # CNN主干网络
 ## CNN基础
+### 卷积特性
+* ***局部感知***
+* ***权值共享***
+### 普通2D卷积
+
+<div align=center>
+
+![swin](./img/convolutional.gif)
+
+</div>
+<div align=center>
+
+![swin](./img/conv.png)
+
+</div>
+
+**PYTORCH** 参数：
+
+* **$in\_channels (int)$** – 输入特征图的维度
+
+* **$out\_channels (int)$** – 输出特征图的维度
+
+* **$kernel\_size (int or tuple)$** – 卷积核大小
+
+* **$stride (int or tuple, optional)$** – 步距. 默认: 1
+
+* **$padding (int, tuple or str, optional)$** – 填充添加到输入的所有四个边. 默认: 0
+
+* **$padding\_mode (string, optional)$** – 'zeros', 'reflect', 'replicate' or 'circular'. 默认: 'zeros'
+
+* **$dilation (int or tuple, optional)$** – 空洞卷积. 默认: 1
+
+* **$groups (int, optional)$** – 组卷积的组数. 默认: 1
+
+* **$bias (bool, optional)$** – 是否添加偏置. 默认: True
+
+**PYTORCH** 中 **tensor** 的 **shape**
+* input:$(N,C_{in},H_{in},W_{in})$ or $(N,H_{in},W_{in})$ 
+* output:$(N,C_{out},H_{out},W_{out})$ or $(N,H_{out},W_{out})$
+
+
+<div align=center>
+
+  $H_{out} = \lfloor \frac{H_{in} + 2 \times padding[0] - dilation[0] \times (kernel\_size[0] - 1) - 1}{stride[0]} + 1\rfloor$
+  $W_{out} = \lfloor \frac{W_{in} + 2 \times padding[1] - dilation[1] \times (kernel\_size[1] - 1) - 1}{stride[1]} + 1\rfloor$
+
+
+  可以简化为 $N{out} = \lfloor \frac{N_{in} + 2 \times padding -  kernel \_ size}{stride} + 1 \rfloor$
+</div>
+
+卷积复现代码:
+```python
+def _zero_padding2d(x: Tensor, padding: int) -> Tensor:
+    """零填充(F.pad())
+
+    :param x: shape = (N, C, Hin, Win)
+    :param padding: int
+    :return: shape = (N, C, Hout, Wout)"""
+
+    # 开辟一个全为0的特征矩阵
+    output = torch.zeros((*x.shape[:2],  # N, C
+                          x.shape[-2] + 2 * padding,  # Hout
+                          x.shape[-1] + 2 * padding), dtype=x.dtype, device=x.device)  # Wout
+    h_out, w_out = output.shape[-2:]
+
+    # 把原特征矩阵 放入 新特征矩阵的 的 padding:h_out - padding, padding:w_out - padding 位置
+    output[:, :, padding:h_out - padding, padding:w_out - padding] = x
+    return output
+
+def _conv2d(x: Tensor, weight: Tensor, bias: Tensor = None, stride: int = 1, padding: int = 0) -> Tensor:
+    """2d卷积(F.conv2d()). 点乘
+
+    :param x: shape = (N, Cin, Hin, Win)
+    :param weight: shape = (Cout, Cin, KH, KW)
+    :param bias: shape = (Cout,)
+    :param stride: int
+    :param padding: int
+    :return: shape = (N, Cout, Hout, Wout)
+    """
+    if padding:
+        x = _zero_padding2d(x, padding)
+    kernel_size = weight.shape[-2]
+    
+    # Out = (In + 2*P − K) // S + 1
+    output_h, output_w = (x.shape[2] - kernel_size) // stride + 1, \
+                         (x.shape[3] - kernel_size) // stride + 1
+    
+    # 开辟一个 shape 为 (x.shape[0], weight.shape[0], output_h, output_w) 空间来存放输出特征图
+    output = torch.empty((x.shape[0], weight.shape[0], output_h, output_w),
+                         dtype=x.dtype, device=x.device)
+    
+    # 把 输入特征图的进行切片 start : start + ks 与 与卷积核运算 填入 对应的 输出特征图位置
+    for i in range(output.shape[2]):  # Hout
+        for j in range(output.shape[3]):  # Wout
+            h_start, w_start = i * stride, j * stride
+            # h_pos, w_pos = slice(h_start, (h_start + kernel_size)), \
+            #                slice(w_start, (w_start + kernel_size))
+
+            # 把原特征图需要卷积的部分切片 
+            sample_x = x[:, None, :, h_start:(h_start + kernel_size),
+                       w_start: (w_start + kernel_size)]  # N , 1, Cin, kH, kW
+            
+            weight_ = weight[None, :, :, :, :]  # 1, Cout, Cin, kH, kW
+
+            # 卷积操作
+            out_result = sample_x * weight_ # N, Cout, Cin, KH, KW
+
+            # 把 Cin KH KW 相加 填入目标位置
+            output[:, :, i, j] = torch.sum(out_result, dim=(-3, -2, -1))
+
+    return output + (bias[:, None, None] if bias is not None else 0)  # 后对齐
+```
+### 空洞卷积（膨胀卷积）
+
+<div align=center>
+
+![swin](./img/dilation.gif)
+
+<font size = 5> $s = 1, r = 2（表示两个kernel元素距离）,p = 0, k = 3$ </font>
+
+</div>
+
+作用：增大感受野，保持原输入特征图的 $W、H$（通常设置 **padding** ）
+
+<div id="group_conv"></div>
+
+### 组卷积
+
+<div align=center>
+
+![swin](./img/groupconv.png)
+
+<font size = 5> $s = 1, r = 2（表示两个kernel元素距离）,p = 0, k = 3$ </font>
+
+</div>
+
+作用：
+减少参数量，相比不分组，则分 $g$ 个组的参数量则为不分组的 **$\frac{1}{g}$**
+
+把 **feature map** 分组，每个卷积核只负责对应该组内的卷积
+
+### 深度可分离卷积
+
+
+### 不对称卷积
+
+
+### 转置卷积（Transposed Convolutional）
+
+<div align=center>
+
+![swin](./img/tranconv_1.gif)
+
+<font size = 5> $s = 1, p = 0, k = 3$ </font>
+
+</div>
+
+<div align=center>
+
+![swin](./img/transconv_2.gif)
+
+<font size = 5> $s = 2, p = 0, k = 3$ </font>
+
+</div>
+
+<div align=center>
+
+![swin](./img/transconv_3.gif)
+
+<font size = 5> $s = 2, p = 1, k = 3$ </font>
+
+</div>
+
+注意：
+* **转置卷积不是卷积的逆运算**
+* **转置卷积也是卷积**
+
+作用：
+* **上采样（upsampling）**
+
+Step：
+* **在输入特征图元素间填充 $s-1 $ 行、$s-1 $列 $0$**
+* **在输入特征图四周填充 $k-p-1$ 行、$k-p-1$ 列 $0$**
+* **将卷积核参数上下、左右翻转**
+* **做正常卷积运算（填充 $0$，步距 $1$，这里的步距并不是上述所说转置卷积的s，而是正常卷积的新步距）**
+
+<div align=center>
+
+$H_{out} = (H_{in} - 1) \ times stride[0] - 2 \ times padding[0] + kernel \_ size[0]$
+
+$W_{out} = (W_{in} - 1) \ times stride[1] - 2 \ times padding[1] + kernel \_ size[1]$
+
+</div>
+
+### 转置卷积的高效操作
+<div align=center>
+
+![swin](./img/efficent_conv_1.png)
+<font size = 5> $把卷积核填入全为0的矩阵对应位置生成稀疏矩阵$ </font>
+</div>
+<div align=center>
+
+![swin](./img/efficent_conv_2.png)
+<font size = 5> $把输入特征图展平$ </font>
+</div>
+<div align=center>
+
+![swin](./img/efficent_conv_3.png)
+<font size = 5> $把每个位置生成的稀疏矩阵展平再拼接$ </font>
+</div>
+<div align=center>
+
+![swin](./img/efficent_conv_4.png)
+<font size = 5> $矩阵乘$ </font>
+</div>
+
+<div align=center>
+
+![swin](./img/efficent_conv_5.png)
+<font size = 5> $O^{1\times4} C^T = P ^{1\times 16} \not ={ I ^{1\times 16}}$ </font>
+</div>
+
+<div align=center>
+
+![swin](./img/img.gif)
+
+</div>
+
 ## AlexNet
+### 网络结构
+<div align=center>
+
+![swin](./img/AlexNet.png)
+
+</div>
+
+### 亮点
+* ***首次利用 **GPU** 进行网络加速训练。***
+* ***使用了 [ReLU](#relu) 激活函数，而不是传统的 [$Sigmoid$](#sigmoid) 激活函数以及 [$Tanh$](#tanh) 激活函数。***
+* ***使用了 **LRN** 局部响应归一化。***
+* ***在全连接层的前两层中使用了 **Dropout** 随机失活神经元操作，以减少过拟合。***
+
+LRN：
+
+<div align=center>
+
+$$b_{x,y}^i = \Bigg(\frac{a_{x,y}^i}{\alpha \sum^{min(N-1,i + n / 2)}_{j = max(0,i - n / 2)}(a_{x,y}^i)^2} + k \Bigg)^\beta$$
+
+</div>
+
+从附近的 **channel** 中 不同 **feature map**中的相同位置进行归一化，以如下 $4$ 个**feature map** 为例：
+
+<div align=center>
+
+![swin](./img/LRN.png)
+</div>
+
+**LRN** 的作用：防止过拟合
+
+但是在 **VGG** 中被证明 其实并没有什么用
+
 ## VGGNet
+
+
+### 网络结构
+<div align=center>
+
+![swin](./img/VGGnet.png)
+
+</div>
+
+### 亮点
+
+* ***通过堆叠多个$3\times3$的卷积核来代替大尺寸的卷积核，论文中提到：可以通过两个$3\times3$的卷积核来代替一个$5\times5$的卷积核，通过堆叠三个$3\times3$的卷积核来代替一个$7\times7$的卷积核，因为他们具有相同的感受野。***
+
+感受野计算公式：
+<div align=center>
+
+$F(i) = [F(i + 1) - 1] \times Stride + Kernel\_Size (F(i) 表示 第i层的感受野)$
+
+</div>
+
+
+
 ## GoogLeNet
+
+<div align=center>
+
+![swin](./img/GoogLeNet.png)
+
+</div>
+
 ### Incetption v1
+
+<div align=center>
+
+![swin](./img/inception_v1.JPG)
+
+</div>
+
+#### 亮点
+
+* ***引入了Inception结构（融合不同尺度的特征信息）***
+* ***使用1x1的卷积核进行降维以及映射处理，vgg网络中也有使用，这里给出了详细介绍***
+* ***添加两个辅助分类器帮助训练***
+* ***丢弃全连接层，使用平均池化层（大大减少模型参数）***
+
+#### 结构
+
+与以往的串联的结构不同，**Inception** 结构采用的是多分支的并行结构，$a$ 分为 $4$ 个分支最左侧采用$1\times1$的卷积，第二个分支为$3\times3$的卷积，第三个分支为$5\times5$的卷积，第四个分支为一个$3\times3$的 **max pooling** ，$b$ 在 $a$ 的基础上再第二个和第三个分支的前面加了以$1\times1$的卷积核进行降维，第四个分支在 **max pooling** 层的后面接了一个$1\times1$的卷积，最后把所有分支的结果进行 $Concat$。采用$1\times1$的卷积是为了降维，以降低参数量，第四个分支的卷积在池化后面也是为了降低参数量，先 **pooling** 再 **conv** 可以降低 **conv** 的参数量。
+
+#### 辅助分类器
+
+<div align=center>
+
+![swin](./img/assistant.png)
+
+</div>
+
+
+在 **Inception 4(a)** 和 **Inception 4(d)** 的后面都接了一个辅助分类器，两个辅助分类器一样，都是先经过一个$5\times5$ 步距为3的平均池化，在经过一个$1\times1$ 步距为1的卷积层，再经过两个全连接层，最后通过 **softmax** 进行输出预测
+
 ### Incetption v2
+
+<div align=center>
+
+![swin](./img/Inception_v2.png)
+
+</div>
+
+在V1的基础上:
+* ***采用了之前vgg网络的通过两个$3\times3$的卷积堆叠来代替$5\times5$的卷积来代减少参数量***
+* ***创新性的用了$1\times3 ，3 \times 1$的不对称卷积，同样可以用 $1\times n ，n \times 1$来降低参数量***
+
+
 ### Incetption v3
+
+在V2的基础上:
+
+* ***在辅助分类器中采用了 [Batch Normalization](#bn)***
+
+
 ### Incetption v4
+
+<div align=center>
+
+![swin](./img/Inception_v4.png)
+
+</div>
+
+在V3的基础上：
+* ***引用了残差结构，设计了多种Inception-ResNet结构***
+
 ## ResNet
+
+<div align=center>
+
+![swin](./img/resnet.jpg)
+![swin](./img/residual_unit.png)
+
+</div>
+
+### 亮点
+
+* ***超深的网络结构(突破1000层)，解决了模型退化的问题***
+* ***提出residual模块，解决了梯度消失的问题***
+* ***使用Batch Normalization加速训练(丢弃dropout)***
+
+### 残差结构
+
+<div align=center>
+
+![swin](./img/residual.png)
+
+</div>
+
+左侧是ResNet 18/34的残差结构，右侧是ResNet  $50/101/152$ 的残差结构，其中右侧$1\times1$的卷积使用来升降维的，右侧的结构是输入channel为 $256$，经过一个 $64$ 个$1\times1$的卷积对输入特征图进行降维，再经过一个$3\times3$的提却特征，最后经过一个$1\times1$的升维回 $256$ 再与原来的输入进行相加后再relu激活。
+
+### 反向传播
+
+<div align=center>
+
+$y_l = h(x_l) + F(x_l,W_l)$
+$x_{l+1} = f(y_l)$
+
+</div>
+
+其中 $x_l$ 和 $x_{l+1}$ 分别表示的是第 $l$ 个残差单元的输入和输出，注意每个残差单元一般包含多层结构。 $F$ 是残差函数，表示学习到的残差，而 $h(x_l) = x_l$ 表示恒等映射， $f$ 是ReLU激活函数。基于上式，我们求得从浅层 $l$ 到深层 $L$ 的学习特征为：
+
+<div align=center>
+
+$$x_L = x_l + \sum_{i=1}^{L-1} F(x_i,W_i)$$
+
+</div>
+
+根据链式求导法则，可以求得反向过程的梯度
+
+<div align=center>
+
+$$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot \frac{\partial x_L}{\partial x_l} = (1 + \frac{\partial }{ \partial x_l} \sum_{i=l}^{L-1}F(x_i,W_i)) $$
+
+</div>
+
+式子的第一个因子 **$\frac{\partial loss}{\partial x_L}$** 表示的损失函数到达 $L$ 的梯度，小括号中的1表明短路机制可以无损地传播梯度，而另外一项残差梯度则需要经过带有 **weights** 的层，梯度不是直接传递过来的。残差梯度不会那么巧全为 $-1$，而且就算其比较小，有1的存在也不会导致梯度消失。所以残差学习会更容易。要注意上面的推导并不是严格的证明。
+
+### 不同深度的ResNet
+
+<div align=center>
+
+![swin](./img/resnet_dif_layers.jpg)
+
+</div>
+
+
+
 ## ResNeXt
+
+### [组卷积](#group_conv)
+
+<div align=center>
+
+![swin](./img/resnext.PNG)
+
+</div>
+
+更新了resnet 50及更深的网络的block
+
+
+<div align=center>
+
+![swin](./img/resnext_equi.PNG)
+
+</div>
+
+上面的 $3$ 种结构在数学计算上是完全等价的，$b$ 的第一层为32组$1\times1$的 **output channel** 为 $4$ 的卷积，$c$ 的第一层为 $128$ 个 $1\times1$的卷积，是等价的，同样的，$b$ 的第二层为32组 $3\times3$的 **output channel** 为 $4$ 的卷积,再 **channel** 方向进行拼接为 $128$ 的特征层，$c$ 的第二层为 $128$ 个$3\times3$的卷积，最后都经过 $256$ 个$1\times1$的卷积升维回 $256维$，$a$ 种的第三层等价于 $b$ 中的 $concat$ 和升维操作。
+
+
+### resnet 与 resnext结构的对比
+
+<div align=center>
+
+![swin](./img/resnext_vs_resnet.jpg)
+
+</div>
+
+
 ## MobileNet
+
+**MobileNet** 网络是由google团队在2017年提出的，专注于移动端或者嵌入式设备中的轻量级CNN网络。相比传统卷积神经网络，在准确率小幅降低的前提下大大减少模型参数与运算量。(相比 **VGG16** 准确率减少了$ 0.9\% $，但模型参数只有 **VGG** 的 $1/32$ )
+
+### V1
+#### 亮点
+* ***Depthwise Convolution(大大减少运算量和参数数量)***
+* ***增加超参数α、β(α是控制卷积核个数的倍率银子，β是控制分辨率的因子)***
+
+#### Depthwise Separable Convolution
+##### Depthwise Convolution
+
+<div align=center>
+
+![swin](./img/depthwise_conv.png)
+
+</div>
+
+
+普通卷积的卷积核的 **channel(input channel)** 与 输入特征层的 **channel** 一致，输出特征层的**channel** 与 卷积核的个数一样。***深度卷积的卷积核的 channel 为 1，输入特征矩阵的 channel = 卷积核个数 = 输出特征矩阵的 channel。（每一个卷积核只负责对一个特征层channel进行卷积，然后对应输出一个特征层）***
+
+##### Pointwise Convolution
+
+<div align=center>
+
+![swin](./img/depthwise_separable_conv.png)
+
+</div>
+
+其实就是**kernel_size** 为 $1$ 的普通卷积，**Pointwise Convolution** 通常和 **Depthwise Convolution** 一起使用来构成 **Depthwise Separable Convolution**
+
+对比普通卷积减少的参数量如下：
+
+<div align=center>
+
+![swin](./img/mobilenet_para.png)
+
+</div>
+
+### V2
+
+#### 亮点
+
+* ***Inverted Residuals（倒残差结构）***
+* ***Linear Bottlenecks***
+
+#### Inverted Residuals
+
+<div align=center>
+
+![swin](./img/reverted_residual.png)
+
+</div>
+
+**residual block** 先采用$1\times1$的卷积进行降维，再通过$3\times3$的卷积提取特征，最后通过$1\times1$的卷积进行升维，先降后升是为了减少参数量，而 **Inverted Residuals block** 则相反，先通过$1\times1$的卷积进行升维，再通过DW卷积进行提取特征，最后通过$1\times1$的卷积进行降维，因为 **DW卷积** 对比普通卷积已经减少了很多参数量，这里采用先升后降是为了更好的提取特征。
+
+#### Linear Bottlenecks
+
+<div align=center>
+
+![swin](./img/linear_bottleneck.png)
+
+</div>
+
+论文中验证了 **ReLU** 激活函数对低维特征信息照成大量损失，而 **Inverted Residuals** 的最后输出就是低维特征，所以 **Inverted Residuals** 的最后的激活函数是一个线性的激活函数。
+
 ## DenseNet
----
+
+<div align=center>
+
+![swin](./img/densenet.jpg)
+
+</div>
+
+### 亮点
+
+* ***减轻了梯度消失***。
+
+* ***加强了 feature 的传递***
+
+* ***加强了特征的重用***
+
+* ***一定程度上减少了参数数列***。
+### 对比ResNet
+
+假设输入为一个图片 $X_0$ , 经过一个L层的神经网络, 其中第i层的非线性变换记为 $H_i(*)$ , $H_i(*)$ 可以是多种函数操作的累加如 **BN、ReLU、Pooling或Conv** 等. 第 $i$ 层的特征输出记作 $X_i$ .
+
+传统卷积前馈神经网络将第i层的输出 $X_i$ 作为i+1层的输入,可以写作$X_i = H_i(X_{i- 1})$. 
+**ResNet** 增加了旁路连接,可以写作 $X_l = H_l(X_{l - 1}) + X_{l-1}$.
+**DenseNet** 如上图所示,第 $i$ 层的输入不仅与 $i-1$ 层的输出相关,还有所有之前层的输出有关.记作:$X_l = H_l \: Concat([X_0,X_1,...,X_{i-1}])$ ,既将 $X_0$ 到 $X_1$ 层的所有输出 **feature map**按**Channel** 组合在一起.这里所用到的非线性变换H为$BN+ReLU+ Conv(3×3)$的组合
+
+由于在 **DenseNet** 中需要对不同层的 **feature map** 进行 $Concat$ 操作,所以需要不同层的 **feature map** 保持相同的 **feature size**,这就限制了网络中**Down sampling**的实现.为了使用 **Down sampling**,作者将 **DenseNet** 分为多个 **Denseblock**,如下图所示:
+
+<div align=center>
+
+![swin](./img/dense_block.png)
+
+</div>
+
+在同一个 **Denseblock** 中要求 **feature size** 保持相同大小,在不同 **Denseblock** 之间设置**transition layers** 实现 **Down sampling** , 在作者的实验中 **transition layer**由$BN + Conv(1×1) ＋2×2 average-pooling$组成.
+
 # 目标检测主流模型
 ## Two Stage
 ### RCNN系列
 #### RCNN
 #### Fast RCNN
 #### Faster RNN
+
+<div id="swinod"></div>
+
+### Swin Transformer Object Detection
+
+**Swin Transformer Object Detection** 是基于 **MMDetection** 搭建的这里提供了两种目标检测的方法（**Mask RCNN / Cascade Mask RCNN**），这里以 **Mask RCNN** 为例，整体结构分为四个部分：**backbone、neck、rpn head、roi head**。
+
+$$ 
+Mask \: RCNN 
+\left\{
+\begin{aligned}
+Backbone \\
+Neck \\
+RPN \: head \\
+ROI \: head
+\end{aligned}
+\right.
+$$
+
+#### BackBone
+
+由四个 **BasicLayer** 组成，包含 **blocks** 和 **patch merging** 两个结构。**blocks** 中包含若干个基本 **swin transformer** 模块，**patch merging** 负责下采样，每经过一个 **patch merging** 特征图的宽高变为原来的一半，**channel** 变为原来的两倍。以输入图象 $（3，800，1216）$ 为例，首先经过[patch partation & linear embedding](#pp_le)变成$（96，200，304）$，依次输入4个 **BasicLayer** 。输出out依次为：$（1，96，200，304）$ $（1，192，100，152）$ $（1，384，50，76）$ $（1，768，25，38）$。将输出**out** 送进 **FPN** 
+
+#### Neck
+
+$$ Neck \left \{
+\begin{aligned}
+lateral \_ convs \\\\
+fpn\_convs
+\end{aligned}
+\right.
+$$
+
+**Neck** 为 **FPN** 结构，从 **Backbone** 的四个 **Stage** 每一层的输出形成一个金字塔结构，每个 **stage** 输出特征层的 **channe** l作为 **FPN** 的 **input channel**，**FPN**的**output channel**为$256$，输出特征层的数量为$5$。**lateral_convs**通过**kernel size为1，stride为1的卷积** 把四个 **stage**的**channel** $[96, 192, 384, 768]$，统一变成$256$，再通过**fpn_convs**用**kernel size为3，stride为1，padding为1的卷积** 对上述4个 **channel** 为$256$的特征图进行卷积，通过上层特征图通过双线性插值（**F.interpolate**）加到下一层特征图中，最后最上层特征图 $（25，38，256）$直接maxpool生成第五层特征图 $（13，19，256）$。这里共有五个特征层。
+
+#### RPN Head
+
+$$ RPN \: Head \left\{
+\begin{aligned}
+rpn\_conv \\
+rpn\_cls \\
+rpn\_reg
+\end{aligned}
+\right.
+$$
+
+这里 **RPN** 结构用三个卷积，把5层特征图—>分类和回归，**rpn_conv** 为 **Conv2d($256, 256$, kernel_size=($3, 3$), stride=($1, 1$), padding=($1, 1$))** 用来提取特征，**rpn_cls** 为 **Conv2d($256, 3$, kernel_size=($1, 1$), stride=$(1, 1$))** 用来分类，这里**out_channel** 为 $3$ 表示 $3$ 个**anchor** 尺度分别为 $（2:1，1:1，1:2）$，**rpn_reg** 为 **Conv2d($256, 12$, kernel_size=($1, 1$), stride=($1, 1$))** 用来对bbox回归，**out_put channel** 代表：($4$个坐标值*$3$ anchor）。
+
+具体运算细节为：根据 **score**(如$200，308，256$)分数得到每层前$1000$个目标，然后加一起，得到**bbox**：$（4741，5）$（因为第五层只有$13 *19 *3$，只有$741$个，不足$1000$个目标）。最后送入**NMS**得到$1426$个目标，只选$1000$ 个得到最后输出的Rois：$（1000，5）$
+
+#### ROI Head 
+
+通过计算 **rois** 中目标的面积，将其分配到5层特征图
+
+$$
+  \begin{aligned}
+  \bigg[ \log_2 (\frac{S_{1000}}{56+ \epsilon})\bigg]_{floor}
+\end{aligned}
+$$
+
+**$S_{1000}$** 表示 $1000$ 个候选框的面积，$56+ \epsilon$ 是已经调到最好的尺度比例，$\epsilon $ 为 $1e-6$，这个公式用来判断每一个面积属于哪一个特征层。
+
+通过
+
+```python
+# 循环5层特征图i：
+roi_feats_t = self.roi_layers[i]（feats[i],rois）
+# self.roi_layers：
+                  RoIAlign(out=(7,7,scale=0.25)
+                  RoIAlign(out=(7,7,scale=0.125)
+                  RoIAlign(out=(7,7,scale=0.0625) 
+                  RoIAlign(out=(7,7,scale=0.03175)
+```
+以第一层特征图为例，**feats[i]** 为$（1，200，304，256$）,**rois**为$（689，5）$。$689$是从$1000$个感兴趣区域中计算出的属于第一层特征图的目标。
+输出 **roi_feats_t** 维度为$(689,256,7,7)$。
+最终输出 **roi_feats** 维度为$（1000，256，7，7）$
+
+最后再对特征图$(1000,256,7,7,)$：分类+回归
+
+```python
+cls_score,bbox_pred = self.bbox_head(bbox_feats)
+# (1000,81)  (1000,320)
+det_bbox,det_label = multiclass_nms(bbox,score)
+# (57,5) (57) 
+```
+
 ## One Stage
 ### SSD系列
 #### SSD
 #### DSSD
+### RetinaNet
 ### Yolo系列
 #### Yolov1
 #### Yolov2
@@ -447,6 +1078,13 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 #### Yolov4
 #### Yolov5
 <div id="focus"></div>
+
+### DETR
+
+
+
+
+
 
 ---
 # RNN系列
@@ -458,8 +1096,29 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 # 神经网络知识
 ## 梯度消失梯度爆炸
 ## 激活函数
+
+<div id="sigmoid"></div>
+
+### Sigmoid
+
+<div id="tanh"></div>
+
+### Tanh
+
+<div id="relu"></div>
+
+### ReLU
+### LeakyReLU
+### GeLU
+### Mish
 ## Normalization
+
+<div id="bn"></div>
+
 ### Batch Normalization
+
+<div id="ln"></div>
+
 ### Layer Normalization
 <div id="bn_vs_ln"></div>
 
@@ -468,6 +1127,11 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 ## 正则
 ## 损失函数
 ## 优化器
+
+<div id="attn"></div>
+
+## Attention
+
 ---
 # 机器学习
 ---

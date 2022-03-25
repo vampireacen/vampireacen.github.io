@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Majax 测试</title>
+<style>
+    /*公式去掉外边框，自动换行*/
+    .MathJax_Display{overflow-x:auto;overflow-y:hidden;}
+    .MathJax{outline:0;}
+</style>
+</head>
+<body>
+<h1>简单公式</h1>
+$$
+e^x=\lim_{n\to\infty} \left( 1+\frac{x}{n} \right)^n
+\qquad (1)
+$$
+$$
+x_1 = \frac{-b+\sqrt{b^2-4ac}} {2a}
+\qquad (2)
+$$
+$$
+x_1 = \frac{-b-\sqrt{b^2-4ac}} {2a}
+\qquad (3)
+$$
+
+<h1>使用LaTeX语法对齐</h1>
+\begin{align}
+\sqrt{37} & = \sqrt{\frac{73^2-1}{12^2}} \\
+& = \sqrt{\frac{73^2}{12^2}\cdot\frac{73^2-1}{73^2}} \\
+& = \sqrt{\frac{73^2}{12^2}}\sqrt{\frac{73^2-1}{73^2}} \\
+& = \frac{73}{12}\sqrt{1 - \frac{1}{73^2}} \\
+& \approx \frac{73}{12}\left(1 - \frac{1}{2\cdot73^2}\right)
+\end{align}
+
+<h1>流程图</h1>
+$\require{AMScd}$
+\begin{CD}
+A @>a>> B\\
+@V b V V center @VV c V\\
+C @>>d> D
+\end{CD}
+
+$$ 
+Mask \: RCNN 
+\left\{
+\begin{aligned}
+Backbone \\
+Neck \\
+RPN \: head \\
+ROI \: head
+\end{aligned}
+\right.
+$$
+
+<!--这里使用了bootcss的cdn来加速访问-->
+<script src="https://cdn.bootcss.com/mathjax/2.7.2/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    showProcessingMessages: false, //关闭js加载过程信息
+    messageStyle: "none", //不显示信息
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX", "output/HTML-CSS"],
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ], //行内公式选择符
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ], //段内公式选择符
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], //避开某些标签
+        ignoreClass:"comment-content" //避开含该Class的标签
+    },
+    "HTML-CSS": {
+        availableFonts: ["STIX","TeX"], //可选字体
+        showMathMenu: false //关闭右击菜单显示
+    }
+});
+MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+</script>
+</body>
+</html>
