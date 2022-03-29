@@ -1,0 +1,1103 @@
+<html>
+  <head>
+	  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>计算机视觉知识汇总</title>
+		<link href="toc/style/github-bf51422f4bb36427d391e4b75a1daa083c2d840e.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/style/github2-d731afd4f624c99a4b19ad69f3083cd6d02b81d5.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/css/zTreeStyle/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
+	  <style>
+		pre {
+		    counter-reset: line-numbering;
+		    border: solid 1px #d9d9d9;
+		    border-radius: 0;
+		    background: #fff;
+		    padding: 0;
+		    line-height: 23px;
+		    margin-bottom: 30px;
+		    white-space: pre;
+		    overflow-x: auto;
+		    word-break: inherit;
+		    word-wrap: inherit;
+		}
+
+		pre a::before {
+		  content: counter(line-numbering);
+		  counter-increment: line-numbering;
+		  padding-right: 1em; /* space after numbers */
+		  width: 25px;
+		  text-align: right;
+		  opacity: 0.7;
+		  display: inline-block;
+		  color: #aaa;
+		  background: #eee;
+		  margin-right: 16px;
+		  padding: 2px 10px;
+		  font-size: 13px;
+		  -webkit-touch-callout: none;
+		  -webkit-user-select: none;
+		  -khtml-user-select: none;
+		  -moz-user-select: none;
+		  -ms-user-select: none;
+		  user-select: none;
+		}
+
+		pre a:first-of-type::before {
+		  padding-top: 10px;
+		}
+
+		pre a:last-of-type::before {
+		  padding-bottom: 10px;
+		}
+
+		pre a:only-of-type::before {
+		  padding: 10px;
+		}
+
+		.highlight { background-color: #ffffcc } /* RIGHT */
+		</style>
+  </head>
+  <body>
+	  <div>
+				<div style='width:25%;'>
+						<ul id="tree" class="ztree" style='width:100%'>
+
+						</ul>
+				</div>
+        <div id='readme' style='width:70%;margin-left:20%;'>
+          	<article class='markdown-body'>
+            	<div id="title" align=center>
+<font face="黑体" size=7>
+
+<strong>计算机视觉知识汇总</strong>
+</font>
+</div>
+
+<h1 id="transformer-">Transformer主干网络</h1>
+<h2 id="transformer">Transformer</h2>
+<div align=center>
+
+<img src="./img/transformer.jpg" alt="transformer">
+
+</div>
+
+<h3 id="input-embedding">input Embedding</h3>
+<div id="im">
+<p>
+
+<strong>input Embedding</strong> 就是 <strong>nlp</strong> 中的 <strong>word embedding</strong> 词编码 (只涉及cv知识，其他方向不做详述)
+
+</p>
+</div>
+
+<h3 id="positional-encoding">Positional Encoding</h3>
+<div id="pe">
+
+经过<strong>word embedding</strong> 获得了词与词之间的关系表述，但是<strong>word embedding</strong>是对所有词同时编码无法获得其位置关系，由于<strong>Transforme</strong>r中是并行的处理所有句子，因此需要加入词在句子中的位置信息，所以进行<strong>Positional Embedding</strong>。
+论文中给出了两种位置编码形式：
+* 根据所给公式进行绝对位置编码：
+
+<div align=center>
+
+<img src="./img/position_embedding.png" alt="transformer">
+
+</div>
+
+<ul>
+<li>使用可训练位置编码，让网络自己学习其位置编码
+由于这两种编码在实验中的效果相差很小，所以作者为了减少参数量选择了根据公式进行绝对位置编码。</li>
+</ul>
+<p></div></p>
+<h3 id="encoder">Encoder</h3>
+<h4 id="multi-head-self-attention">Multi-Head self-<a href="#attn">Attention</a></h4>
+<div align=center> 
+
+<strong>$Attention(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}})V$</strong>
+
+</div>
+
+<p><img src="./img/sa2.png" alt="transformer">
+<img src="./img/sa3.png" alt="transformer">
+经过编码后的输入$a1$,$a2$(为了方便描述取两个输入)与$Q,K,V$(可训练)权重矩阵相乘生成对应的$q_1,k_1,v_1$ 与 $q_2,k_2,v_2$,再每一个$q_i$与每一个$k_i$做<strong>点积 (dot product)</strong>，由于transformer全都可以并行化操作所以这里其实就是$QK^T$，然后再比上$\sqrt{d_k}$($d_k$是K的维度)，再经过$softmax$后与$V$进行矩阵乘。</p>
+<p>这里有几个问题：</p>
+<ul>
+<li>$Q1$：$Q,K,V$分别是什么意思？</li>
+<li>$A1$：首先$Q,K,V$分别是<strong>Query，Key，Value</strong>的缩写，<strong>Query，Key，Value</strong>的概念取自于信息检索系统，举个简单的搜索的例子来说。当你在某电商平台搜索某件商品（年轻女士冬季穿的红色薄款羽绒服）时，你在搜索引擎上输入的内容便是<strong>Query</strong>，然后搜索引擎根据<strong>Query</strong>为你匹配<strong>Key</strong>（例如商品的种类，颜色，描述等），然后根据<strong>Query</strong>和<strong>Key</strong>的相似度得到匹配的内容（Value)。<a href="https://zhuanlan.zhihu.com/p/48508221">来源 https://zhuanlan.zhihu.com/p/48508221</a></li>
+<li>$Q2$: <strong>Transformer</strong>中为什么使用不同的$K$ 和 $V$， 为什么不能使用同一个值？或者为什么是$Q,K,V$而不是$K$ 和 $V$ 或者$Q$ 和 $V$？</li>
+<li>$A2$: $Q$ 如果自己跟自己($Q$)相乘的话，那么根据向量点积知识知道，俩个向量越相似，内积越大，当一个向量与自己做内积，再与其他不同词的向量做内积后(行成一个打分向量)，该向量经过<strong>softmax</strong>后，就会变为一个有一个位置的值特殊的大(自己与自己相乘)，其他位置的值非常非常小的状况出现，比如[0.98,0.01,0.05,0.05]那么,这样的得分再与$V$矩阵相乘后得出的加权向量就是一个基本上跟自己本身差不多的矩阵，那就失去了<strong>self attention</strong>的意义了。</li>
+<li>$Q3$：为什么$QK^T$要先除以$\sqrt{d_k}$再<strong>softmax</strong>？</li>
+<li>$A3$:对于一个输入向量  ，<strong>softmax</strong>函数将其映射/归一化到一个分布。在这个过程中，<strong>softmax</strong>先用一个自然底数$\exp$将输入中的元素间差距先“拉大”，再除以$\sum e^x_i$后归一化为一个分布。假设某个输入$x$中最大的的元素下标是$k$，如果输入的数量级变大（每个元素都很大），那么会非常接近1。数量级对<strong>softmax</strong>得到的分布影响非常大。在数量级较大时，<strong>softmax</strong>将几乎全部的概率分布都分配给了最大值对应的标签。那么就将产生一个接近<strong>one-hot</strong>的向量,所以反向传播时梯度就消失为0。</li>
+<li>$Q4$: 为什么$QK^T$是除以$\sqrt{d_k}$而不是随便除以一个数？</li>
+<li>$A4$: $q$ 和 $k$ 的各个分量是互相独立的随机变量，均值是0，方差是1，那么点积 $q·k$的均值是0，方差是$\sqrt{d_k}$，所以$\frac{QK^T - 0}{\sqrt{d_k}}$拉回到均值为0， 方差为1的标准正态分布，防止了数量级大使得梯度消失的情况。</li>
+</ul>
+<div align=center> 
+
+<strong>$MultiHead(Q,K,V) = Concat(head_1,head_2,...,head_h)W^O$</strong>
+<strong>$where head_i = Attention(QW_i^Q,KW_i^K,VW_i^V)$</strong>
+
+</div>
+
+
+
+<p><img src="./img/self_attention.png" alt="transformer"></p>
+<p><strong>self attention</strong>中的输入分别与$W^Q,W^K,W^V$相乘产生$q_i,k_i,v_i(Q,K,V)$, <strong>multi-head self attention</strong> 中每一个head都是一个<strong>self attention</strong>，每一个head都有$W^Q_j,W^K_j,W^V_j$生成每一个head中的$q_j,k_j,v_j$，原文(<strong>线性映射</strong>)直接把<strong>self attention</strong>中的$q_i,k_i,v_i$均分给每个head的$q_i^j,k_i^j,v_i^j$,每一个<strong>head</strong>再做<strong>self attention</strong>然后把每个head的结果$Concat$，最后在做一个线性变换，变换到与输入相同的维度。</p>
+<p>问题：</p>
+<ul>
+<li>$Q$: 为什么需要<strong>multi head</strong>呢，只用一个head不行吗？</li>
+<li>$A$: 每个<strong>head</strong>空间中注意到的东西可能都不一样，比如<strong>head</strong>注意到的东西<strong>head</strong>没注意到，<strong>head</strong>注意到的事情<strong>head</strong>没注意到，所以把所有<strong>head</strong>的结果$Concat$相当于注意的更加全面。</li>
+</ul>
+<h4 id="add-norm">Add &amp; Norm</h4>
+<p><strong>Add</strong> 指残差结构，把<strong>multi-head self attention</strong>的输入与其输出做一个相加，因为<strong>multi-head</strong>后的结果经过了一个线性变换使得输入输出是相同的维度，所以可以相加。</p>
+<p><strong>Norm</strong>指 <strong>Layer Normalization</strong>，通常用于 <strong>RNN</strong> 结构，<strong>Layer Normalization</strong> 会将每一层神经元的输入都转成均值方差都一样的，这样可以加快收敛。
+问题：</p>
+<ul>
+<li>$Q$: 为什么不用 <strong>Batch Normalization</strong> 而是用 <strong>Layer Normalization</strong>？</li>
+<li>$A$: <a href="#bn_vs_ln">答案</a></li>
+</ul>
+<h4 id="feed-forward">Feed Forward</h4>
+<p><strong>Feed Forward</strong> 层比较简单，是一个<strong>两层的全连接层</strong>，第一层的激活函数为 <strong>Relu</strong>，第二层不使用激活函数，对应的公式如下:</p>
+<div align=center> 
+
+<strong>$Max(0,XW_1+b_1)W_2 + b2$</strong>
+
+</div>
+
+<p>$X_{(n,d)}$经过<strong>multi-head self attention、add &amp; norm 、feed forward</strong>之后输入$O_{(n,d)}$</p>
+<h3 id="decoder">Decoder</h3>
+<h4 id="masked-multi-head-self-attention">Masked Multi-Head Self Attention</h4>
+<p><strong>Decoder</strong>中的第一个<strong>multi-head self attention</strong>为 <strong><em>Masked</em></strong>  <strong>multi-head self attention</strong>，所谓<strong>mask</strong>是一个$n * n$的下三角矩阵如图：<a href="https://zhuanlan.zhihu.com/p/338817680">https://zhuanlan.zhihu.com/p/338817680</a></p>
+<div align=center>
+
+<img src="./img/mask_matrix.jpg" alt="Vit">
+
+</div>
+
+<p>由于<strong>Transform</strong>的并行操作，所以当$QK^T$经过一些列操作后需要与$V$进行矩阵乘，即$QK^T$中的每一个向量需要与$V$中的每一个向量做点积，但是由于句子是序列化，即当第$k$个单词应该只能注意到$k$以及$k$之前的单词，所以这个操作与我们所希望的是违背的，所以需要一个<strong>mas</strong>k矩阵与$QK^T$按位相乘，产生Mask $QK^T$,再softmax后与$V$相乘得相应结果。操作如下：</p>
+<div align=center>
+
+<img src="./img/QK%5ET.jpg" alt="Vit">
+</div>
+<div align=center>
+
+<img src="./img/Mask_QK%5ET.jpg" alt="Vit">
+</div>
+
+<h4 id="-multi-head-self-attention">第二个Multi-Head Self Attention</h4>
+<p><strong>Decoder block</strong> 第二个 <strong>Multi-Head Attention</strong> 变化不大， 主要的区别在于其中 <strong>Self-Attention</strong> 的 $K, V$矩阵不是使用 上一个 <strong>Decoder block</strong> 的输出计算的，而是使用 <strong>Encoder</strong> 的编码信息矩阵 $C$ 计算的。</p>
+<p>根据 <strong>Encoder</strong> 的输出 $C$计算得到 $K, V$，根据上一个 <strong>Decoder block</strong> 的输出 $Z$ 计算 $Q$ (如果是第一个 <strong>Decoder block</strong> 则使用输入矩阵 $X$ 进行计算)，后续的计算方法与之前描述的一致。</p>
+<p>这样做的好处是在 <strong>Decoder</strong> 的时候，每一位单词都可以利用到 <strong>Encoder</strong> 所有单词的信息 (这些信息无需 <strong>Mask</strong>)。</p>
+<h4 id="softmax-">Softmax 预测输出单词</h4>
+<p><strong>Decoder block</strong> 最后的部分是利用 <strong>Softmax</strong> 预测下一个单词，在之前的网络层我们可以得到一个最终的输出 $Z$，因为 <strong>Mask</strong> 的存在，使得单词 $0$ 的输出 $Z_0$ 只包含单词 $0$ 的信息，如下：</p>
+<div align=center>
+
+<img src="./img/last_Z.jpg" alt="Vit">
+
+</div>
+
+<p><strong>Softmax</strong> 根据输出矩阵的每一行预测下一个单词：</p>
+<div align=center>
+
+<img src="./img/softmaxZ.png" alt="Vit">
+</div>
+
+<h3 id="transformer-">Transformer 总结</h3>
+<ul>
+<li><strong>Transformer</strong> 与 <strong>RNN</strong> 不同，可以比较好地并行训练。</li>
+<li><strong>Transformer</strong> 本身是不能利用单词的顺序信息的，因此需要在输入中添加位置 <strong>Embedding</strong>，否则 <strong>Transformer</strong> 就是一个词袋模型了。</li>
+<li><strong>Transformer</strong> 的重点是 <strong>Self-Attention</strong> 结构，其中用到的 $Q, K, V$ 矩阵通过输出进行线性变换得到。</li>
+<li><strong>Transformer</strong> 中 <strong>Multi-Head Attention</strong> 中有多个 <strong>Self-Attention</strong>，可以捕获单词之间多种维度上的相关系数 <strong>attention score</strong>。</li>
+</ul>
+<hr>
+<h2 id="vision-transformer-vit-">Vision Transformer(ViT)</h2>
+<div id="vit">
+<div align=center>
+
+<img src="./img/vit.png" alt="Vit">
+
+</div>
+
+<div id="patch_linear">
+
+### Patches &amp; Linear Projection of Flattened Patches
+
+
+由于<strong>标准的transformer模块</strong>要求输入的是一个<strong>token</strong>序列，而一张图片并不是一个序列，把图像分块（<strong>patches</strong>），由块来组成序列，对于$2D$图像$x\in \mathbb{R}^{H×W×C}$将其分为$P \times P$的 <strong>patches</strong>，$x_p\in \mathbb{R}^{N\times(P^2\cdot C)}$，共分成N个，$N = HW/P^2$，最终获得$N$个 $P^2 \cdot C$特征大小的向量(<strong>768</strong>)。在代码实现中直接用一个卷积层来实现的，以为<strong>Vit-B 16</strong>为例，使用卷积核<strong>kernal size</strong>为$16 \times 16$，<strong>stride</strong>为$16$，卷积核个数为$768$来实现，以$224 \times 224 \times 3$($H  W$为224，的$RGB$ $3 channel$)为例：
+$H  W$为<strong>224</strong>的图片 分成 $H  W$为<strong>16</strong> 的<strong>patches</strong> $\frac{224 \times 224}{16\times16}$共可以分成<strong>196</strong>（$14 \times 14$）个<strong>patch</strong>，每个<strong>patch</strong>依然是<strong>3</strong>个<strong>channel</strong>，所以对于每一个patch的维度为为<strong>768</strong>（$16 \times16 \times 3$），一张$H$为224，$W$为224的图片生成一个$[196\times768]$的二维<strong>token</strong>矩阵。
+
+</div>
+
+<div id="pe_token">
+
+### Position Embedding &amp; token
+
+
+对应的每一个patch生成一个<strong>token</strong>，每个<strong>token</strong>都是768维（$[196\times768]$），在所有<strong>token</strong>前面需要<strong>拼接</strong>一个$[1\times768]$可训练的<strong>class token</strong>（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$
+
+$[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embedding</strong> <strong>添加</strong> 可训练的位置信息$[196\times768] \longrightarrow [196\times768]$，对于使用1D、2D、相对位置编码效果其实相差很小，但是使用位置编码对比不适用位置编码的效果还是很明显:
+<div align=center>
+
+<img src="./img/pe.png" alt="Vit">
+
+</div>
+
+
+<p></div></p>
+<h3 id="transformer-encoder">Transformer Encoder</h3>
+<div align=center>
+
+<img src="./img/transform_encoder.png" alt="Vit">
+
+</div>
+
+<p>首先Vit中没有<strong>Decoder</strong>，只有<strong>Transformer Encoder</strong>，<strong>Encoder block</strong>也有几点与标准<strong>transformer block</strong>有差别：</p>
+<ul>
+<li><strong>Vit</strong>中的<strong>Norm</strong>在<strong>Multi-Head Attention</strong>前面，标准<strong>Transformer</strong>中<strong>Norm</strong>在后面，这样做的好处是<strong>Norm</strong>在前面可以加速模型训练</li>
+<li>在<strong>Multi-Head Attention</strong>与<strong>Add</strong>之间有一个<strong>dropout/dropPath</strong>，图中并没有显示出来</li>
+</ul>
+<h3 id="mlp-head">MLP head</h3>
+<p>标准的<strong>transformer</strong>中最后的预测因为masked的关系，所以每个每个向量只与他前面的向量有关，每个向量负责预测他当前位置的值。而<strong>Vit</strong>中只需要预测类别，即$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$中的$[1 \times 768]$，所以只预测新拼接的第$0$个<strong>token</strong>即可</p>
+<h3 id="vit-base-large-huge-">ViT-Base、Large、Huge的区别</h3>
+<div align=center>
+
+<img src="./img/BLH.png" alt="Vit">
+
+</div>
+
+<ul>
+<li><strong>Patch Size</strong>是指，<strong>patch</strong>大小，<strong>patch size</strong>越小 则 <strong>patch</strong> 越多</li>
+<li><strong>Layer</strong>s是指，<strong>Transformer Encoder</strong> 中 堆叠 <strong>Encoder Block</strong> 的次数</li>
+<li><strong>Hidden Size</strong>是通过<strong>Embedding</strong>层后每个<strong>token</strong>的<strong>dim</strong>（向量的长度），也是卷积核的个数</li>
+<li><strong>MLP size</strong>是<strong>Transformer Encoder</strong>中<strong>MLP Block</strong>第一个全连接的节点个数（是<strong>Hidden Size</strong>的四倍）</li>
+<li><strong>Heads</strong>代表<strong>Transformer</strong>中<strong>Multi-Head Attention</strong>的<strong>heads</strong>数</li>
+</ul>
+<p></div></p>
+<h2 id="swin-transformer-swint-">Swin Transformer(SwinT)</h2>
+<h3 id="swint-vs-vit">SwinT VS ViT</h3>
+<div align=center>
+
+<img src="./img/swin_VS_VIT.jpg" alt="swin">
+
+</div>
+
+<ul>
+<li>特征层的下采样倍率不同，<strong>Swin Transformer</strong>的特征层先经过$4$倍下采样，再经过$8$倍下采样，最后是$16$倍下采样，<strong>ViT</strong>中最开始经过一个$16$倍下采样，之后的所有层都是保持这个$16$倍。可以融合不同倍率特征层的特征。</li>
+<li><strong>Swin Transformer</strong>中的特征层都是被一个一个的小 <a href="#W_SW">Window</a> 给分割开了，<strong>ViT</strong> 则是整个特征层没有被分割。</li>
+</ul>
+<h3 id="swin-transformer-">Swin Transformer 结构</h3>
+<div align=center>
+
+<img src="./img/SwinT.png" alt="swin">
+
+</div>
+
+<h4 id="architecture">Architecture</h4>
+<p>$H\times W \times 3$ 的图像经过 <strong>Patch Partition</strong> 和 <strong>Linear Embedding（Layer Normal）</strong>，变成$\frac{H}{4} \times \frac{W}{4} \times 48$，再经过<strong>Stage1</strong>变为$\frac{H}{4} \times \frac{W}{4} \times C$，再由<strong>Stage2</strong>变成$\frac{H}{8} \times \frac{W}{8} \times 2C$，再经过<strong>Stage3</strong>、<strong>Stage4</strong>变成$\frac{H}{16} \times \frac{W}{16} \times 4C$、$\frac{H}{32} \times \frac{W}{32} \times 8C$，每经过一个 <a href="#patch_merge">Patch Merging</a> 图像宽高缩减为原来的 <font color="#d71345">一半</font> ，<strong>channel</strong> 变为原来的<font color="#d71345">2倍</font>，<strong>Stage1</strong>由<strong>Linear Embedding</strong>和$2$个<strong>Swin Transformer Block</strong>堆叠而成，而后面的<strong>Stage</strong>均是由<strong>Patch Merging</strong>和 <font color="#d71345">偶数个</font> <strong>Swin Transformer Block</strong>堆叠而成。</p>
+<p>偶数个是因为，<strong>Swin Transformer Block</strong>的第一个<strong>block</strong>中<strong>Self Attention</strong>的是<a href="#W_MSA">Window Multi-Head Self Attention</a>(右图中的<font color="#d71345">W-MSA</font>),第二个<strong>block</strong>中<strong>Self Attention</strong>的是<a href="#SW_MSA">Shifted-Window Multi-Head Self Attention</a>(右图中的<font color="#d71345">SW-MSA</font>)</p>
+<div id="pp_le"></div>
+
+<h4 id="patch-partition-linear-embedding">Patch Partition &amp; Linear Embedding</h4>
+<p><strong>Patch Partition</strong>如上图，$H\times W \times 3$的图像被一个$4 \times 4$大小的窗口分割，每个窗口内分成$16$个<strong>patch</strong>，然后<strong>patch</strong>延<strong>channel</strong>方向进行$Concat$，所以$H\times W \times 3$的图像经过<strong>Patch Partition</strong>宽高变成原来的$\frac{1}{4}$，<strong>channel</strong>由3变成48($3 \times 16$)</p>
+<p><strong>Linear Embedding（Layer Normal）</strong>，经过<strong>Patch Partition</strong>后再通过一个线性层对channel进行调整，调整成图中的$C$（具体的$C$根据，<strong>Swin-Tiny、Swin-Small、Swin-Base、Swin-Large</strong>有所不同）。</p>
+<p>实现：<strong>Patch Partition</strong> 和 <strong>Linear Embedding</strong>都是通过卷积层实现的，<strong>kernal size</strong> 为 $4 \times 4$，<strong>stride</strong> 为 $4$， <strong>channel</strong> 为 $48$，类似于ViT中的<a href="#patch_linear">Patches &amp; Linear Projection of Flattened Patches</a>，还要经过一层<strong>LayerNorm</strong></p>
+<div id="patch_merge"></div>
+
+<h3 id="patch-merging">Patch Merging</h3>
+<div align=center>
+
+<img src="./img/patch_merge.png" alt="swin">
+
+</div>
+
+<p>如上图，一个$4\times 4$大小的窗口，按位置进行拆分，如上原图中<strong>蓝、黄、绿、红</strong>对应位置的元素，进行拆分合并成<strong>蓝、黄、绿、红</strong>的$2 \times 2$大小的小窗口给，然后在<strong>channel</strong>方向上进行$Concat$，再经过一个<strong>LayerNorm</strong>后，通过一个全连接层将<strong>channel</strong>整合成原图的<font color="#d71345">2倍</font>，宽高变为原来的<font color="#d71345">1半</font>。类似于<a href="#focus">Focus</a>操作。</p>
+<p>这里的全连接层Linear是<strong>权值共享</strong>的</p>
+<div id="W_SW"></div>
+
+<h3 id="window-shifted-window">Window &amp; Shifted Window</h3>
+<div id="W_MSA"></div>
+
+<h4 id="w-msa">W-MSA</h4>
+<div align=center>
+
+<img src="./img/W_MSA.png" alt="swin">
+
+</div>
+
+<p>对于普通的<strong>Multi-Head Self Attention</strong>的每一个<strong>token</strong>都会去计算$Q,K,V$，$QK^T$运算完之后再去与&amp;V&amp;联系，每一个<strong>token</strong>都会与所有的<strong>token</strong>去进行沟通。</p>
+<p><strong>Window Multi-Head Self Attention</strong> 把特征图进行分块，每个块内部去进行<strong>Self Attention</strong>，这样做的有点是减少了计算量，但是其缺点是只能块内进行沟通，但是块和块之间是无法通信的。</p>
+<div id="SW_MSA"></div>
+
+<h4 id="sw-msa">SW-MSA</h4>
+<p><strong>Shifted-Window Multi-Head Self Attention</strong> 解决了 <strong>Window Multi-Head Self Attention</strong> 块与块之间无法通讯的问题。</p>
+<div align=center>
+
+<img src="./img/shifted_window.png" alt="swin">
+
+</div>
+
+<p>如上图，对于 <strong>W-MSA</strong> 中的Window向下向右偏移了两个 <strong>patch</strong>，生成了一个新的 <strong>Window</strong>（上图中<strong>Layer+1</strong> 所示），这个新的 <strong>Window</strong> 就是 <strong>SW-MSA</strong>，对于<strong>Layer+1</strong>中的上方中间的 <strong>Window</strong>，融合了 <strong>Layer</strong> 中的上面两个 <strong>Window</strong> ，对应<strong> Layer+1</strong> 中左侧中间的<strong> Window</strong> 融合了<strong>Layer</strong>中的左侧两个 <strong>Window</strong>，对于<strong>Layer+1</strong>中的中间大的 <strong>Window</strong> 融合了 <strong>Layer</strong> 中的所有四个<strong>Window</strong>，其他<strong>Window</strong>依次类推。这样就解决了 <strong>W-MSA</strong> Window之间无法通讯的问题。</p>
+<p>但是这样<strong>SW-MSA</strong>分成$9$个<strong>window</strong>是不利于并行计算的，不像<strong>W-MSA</strong>每一个<strong>Window</strong>都是一个$4\times4$大小的，作者提出了一个方法来解决这个问题：</p>
+<div align=center>
+
+<img src="./img/shifted_window_2.png" alt="swin">
+
+</div>
+
+<p>对于$9$个Window标记为$0\sim8$，先将上边的$0,1,2$(图中标记的$A，C$)整体移动到下边，如下图：</p>
+<div align=center>
+
+<img src="./img/shifted_window_3.png" alt="swin">
+
+</div>
+
+<p>对于移动后的新的特征图，再把左侧的$3,6,0$(图中标记的$B,A$)整体移动到左边，这样就又组成了一个新的$4\times 4$的特征图，($5$和$3$看作一个整体，$7$和$1$看作一个整体，$8、6、2、0$看作一个整体)，这样就又可以做$4\times4$的并行计算了如下图：</p>
+<div align=center>
+
+<img src="./img/shifted_window_4.png" alt="swin">
+
+</div>
+
+<p>但是这样又会有一个新问题，即 $5$ 和 $3$原本是不相邻的，把他们强行划到同一个 $4\times4$ 的Window中去做 <strong>Self Attention</strong>是不对的，$5$ 和 $3$应该在自己的 <strong>Window</strong> 内去进行 <strong>Self Attention</strong> (其他Window类似)，解决方法如下：</p>
+<div align=center>
+
+<img src="./img/shifted_window_5.png" alt="swin">
+
+</div>
+
+
+<p>对$5$ 和 $3$ 中的每一个 <strong>patch</strong> 标记为 $0\sim15$，对于 $patch_0$ 的 $q_0$ 对其他所有 <strong>patch</strong> 的 $k_i$ 做点积生成 $\alpha_{0,0}$,$\alpha_{0,1}$,……,$\alpha_{0,15}$ ，对于跟 $patch_0$ 不在同一个区域中的 patch 的点积结果如图中<strong>蓝色方框内的$\alpha$</strong>，先减去100再做 $softmax$，这样这些 $\alpha$ 经过 $softmax$ 之后就会变为0，一个很大的负数取 $exp$ 结果趋于 $0$，这样就会只做同一区域内的 <strong>Self Attention</strong>，计算结束后再还原会原来的位置即可。</p>
+<h3 id="relative-position-bias">Relative position bias</h3>
+<div id="rpb">
+
+<div align=center>
+
+<strong>$Attention(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}} + B)V$</strong>
+
+</div>
+
+<p>与普通的 <strong>Attention</strong> 相比，$\frac{QK^T}{\sqrt{d_k}}$先加$B$，在进行$softmax$，这个$B$就是 <strong>Relative position bias</strong>（相对位置偏置）</p>
+<div align=center>
+
+<img src="./img/relative_position_bias_1.png" alt="swin">
+
+</div>
+
+<p>对于一个$2\times2$的 <strong>feature map</strong>，分别以不同颜色<strong>蓝、黄、红、绿</strong>标识，以<strong>蓝色</strong>为例，当以<strong>蓝色</strong>为基准去计算其他位置的索引时，其他位置的行列坐标减去蓝色的坐标即为关于蓝色的位置索引，然后进行 $flatten$，再把所有位置的 $flatten$ 的索引 $Concat$ 成一个相对位置矩阵。但是作者使用的并不是二维的位置索引，而是一维的位置索引，变化如下图：</p>
+<div align=center>
+
+<img src="./img/relative_position_bias_2.png" alt="swin">
+
+</div>
+
+<p>偏移从 $0$ 开始，行列坐标加上 $M-1$ ，这里的 $M$ 是 <strong>feature map</strong> 的 大小 这里是 $2$， $M-1$ 为 $1$</p>
+<div align=center>
+
+<img src="./img/relative_position_bias_3.png" alt="swin">
+
+</div>
+
+<p>再行列坐标乘上$2M-1$</p>
+<ul>
+<li>Q:为什么是$2M-1$ ？</li>
+<li>A：对于$2\times2$的feature map，其他位置关于基准位置的索引从 $-M + 1 \sim M - 1$ ,以蓝色位列可以去到的最极端的索引为$(-1,-1)$，而对于绿色的来说可以取到的最极端的索引为$(1，1)$，所以对于$2\times2$的 feature map 索引范围是$[-1,0,1]$，二维索引即$[-1,0,1]$的排列组合共有$9$个，即$(2M-1)^2$个。</li>
+</ul>
+<div align=center>
+
+<img src="./img/relative_position_bias_4.png" alt="swin">
+
+</div>
+
+<p>然后再行列坐标相加，变成一维的 <strong>位置索引</strong> 。</p>
+<div align=center>
+
+<img src="./img/relative_position_bias_5.png" alt="swin">
+
+</div>
+
+<p>注意上面是 <strong>位置索引</strong> 而不是 <strong>位置偏置</strong> ，需要拿对应的<strong>位置索引</strong> 去 <strong>相对位置偏置表(Relative position bias table)</strong> 中去取对应的 <strong>相对位置偏置</strong> 即 <strong>Attention</strong> 中的 $B$。</p>
+<p></div></p>
+<h3 id="swin-t-s-b-l-">Swin-T/S/B/L 区别</h3>
+<div align=center>
+
+<img src="./img/Swin_TSBL.png" alt="swin">
+
+</div>
+
+<ul>
+<li><strong>win. sz.</strong> 是指 <strong>Swin Transformer Block</strong> 中的 <strong>Window</strong> 大小，这里四个模型的任何阶段均相同。</li>
+<li><strong>dim</strong> 是指经过每个 <strong>Stage</strong> 后输出的维度</li>
+<li><strong>head</strong> 是指 <strong>Swin Transformer Block</strong> 中头的个数</li>
+<li><strong>S、B、L</strong> 中 <strong>Stage3</strong> 都是堆叠了$18$个 <strong>block</strong></li>
+<li><strong>T、S</strong> 除了 <strong>Stage3</strong> 的堆叠次数外完全一样</li>
+<li><strong>S、B、L</strong> 的 <strong>Stage1</strong> 的 <strong>dim</strong> 分别是$96，128，192$，之后的每一个 <strong>Stage</strong> 的 <strong>dim</strong> 都是之前两倍</li>
+</ul>
+<h3 id="swin-transformer-object-detection"><a href="#swinod">Swin Transformer Object Detection</a></h3>
+<hr>
+<div id="cnn"></div>
+
+<h1 id="cnn-">CNN主干网络</h1>
+<h2 id="cnn-">CNN基础</h2>
+<h3 id="-">卷积特性</h3>
+<ul>
+<li><strong><em>局部感知</em></strong></li>
+<li><strong><em>权值共享</em></strong><h3 id="-2d-">普通2D卷积</h3>
+</li>
+</ul>
+<div align=center>
+
+<img src="./img/convolutional.gif" alt="swin">
+
+</div>
+<div align=center>
+
+<img src="./img/conv.png" alt="swin">
+
+</div>
+
+<p><strong>PYTORCH</strong> 参数：</p>
+<ul>
+<li><p><strong>$in_channels (int)$</strong> – 输入特征图的维度</p>
+</li>
+<li><p><strong>$out_channels (int)$</strong> – 输出特征图的维度</p>
+</li>
+<li><p><strong>$kernel_size (int or tuple)$</strong> – 卷积核大小</p>
+</li>
+<li><p><strong>$stride (int or tuple, optional)$</strong> – 步距. 默认: 1</p>
+</li>
+<li><p><strong>$padding (int, tuple or str, optional)$</strong> – 填充添加到输入的所有四个边. 默认: 0</p>
+</li>
+<li><p><strong>$padding_mode (string, optional)$</strong> – &#39;zeros&#39;, &#39;reflect&#39;, &#39;replicate&#39; or &#39;circular&#39;. 默认: &#39;zeros&#39;</p>
+</li>
+<li><p><strong>$dilation (int or tuple, optional)$</strong> – 空洞卷积. 默认: 1</p>
+</li>
+<li><p><strong>$groups (int, optional)$</strong> – 组卷积的组数. 默认: 1</p>
+</li>
+<li><p><strong>$bias (bool, optional)$</strong> – 是否添加偏置. 默认: True</p>
+</li>
+</ul>
+<p><strong>PYTORCH</strong> 中 <strong>tensor</strong> 的 <strong>shape</strong></p>
+<ul>
+<li>input:$(N,C_{in},H_{in},W_{in})$ or $(N,H_{in},W_{in})$ </li>
+<li>output:$(N,C_{out},H_{out},W_{out})$ or $(N,H_{out},W_{out})$</li>
+</ul>
+<div align=center>
+
+  $$H_{out} = \lfloor \frac{H_{in} + 2 \times padding[0] - dilation[0] \times (kernel_size[0] - 1) - 1}{stride[0]} + 1\rfloor$$
+  $$W_{out} = \lfloor \frac{W_{in} + 2 \times padding[1] - dilation[1] \times (kernel_size[1] - 1) - 1}{stride[1]} + 1\rfloor$$
+
+
+  可以简化为 $$N{out} = \lfloor \frac{N_{in} + 2 \times padding -  kernel _ size}{stride} + 1 \rfloor$$
+</div>
+
+<p>卷积复现代码:</p>
+<pre><code class="lang-python">def _zero_padding2d(x: Tensor, padding: int) -&gt; Tensor:
+    &quot;&quot;&quot;零填充(F.pad())
+
+    :param x: shape = (N, C, Hin, Win)
+    :param padding: int
+    :return: shape = (N, C, Hout, Wout)&quot;&quot;&quot;
+
+    # 开辟一个全为0的特征矩阵
+    output = torch.zeros((*x.shape[:2],  # N, C
+                          x.shape[-2] + 2 * padding,  # Hout
+                          x.shape[-1] + 2 * padding), dtype=x.dtype, device=x.device)  # Wout
+    h_out, w_out = output.shape[-2:]
+
+    # 把原特征矩阵 放入 新特征矩阵的 的 padding:h_out - padding, padding:w_out - padding 位置
+    output[:, :, padding:h_out - padding, padding:w_out - padding] = x
+    return output
+
+def _conv2d(x: Tensor, weight: Tensor, bias: Tensor = None, stride: int = 1, padding: int = 0) -&gt; Tensor:
+    &quot;&quot;&quot;2d卷积(F.conv2d()). 点乘
+
+    :param x: shape = (N, Cin, Hin, Win)
+    :param weight: shape = (Cout, Cin, KH, KW)
+    :param bias: shape = (Cout,)
+    :param stride: int
+    :param padding: int
+    :return: shape = (N, Cout, Hout, Wout)
+    &quot;&quot;&quot;
+    if padding:
+        x = _zero_padding2d(x, padding)
+    kernel_size = weight.shape[-2]
+
+    # Out = (In + 2*P − K) // S + 1
+    output_h, output_w = (x.shape[2] - kernel_size) // stride + 1, \
+                         (x.shape[3] - kernel_size) // stride + 1
+
+    # 开辟一个 shape 为 (x.shape[0], weight.shape[0], output_h, output_w) 空间来存放输出特征图
+    output = torch.empty((x.shape[0], weight.shape[0], output_h, output_w),
+                         dtype=x.dtype, device=x.device)
+
+    # 把 输入特征图的进行切片 start : start + ks 与 与卷积核运算 填入 对应的 输出特征图位置
+    for i in range(output.shape[2]):  # Hout
+        for j in range(output.shape[3]):  # Wout
+            h_start, w_start = i * stride, j * stride
+            # h_pos, w_pos = slice(h_start, (h_start + kernel_size)), \
+            #                slice(w_start, (w_start + kernel_size))
+
+            # 把原特征图需要卷积的部分切片 
+            sample_x = x[:, None, :, h_start:(h_start + kernel_size),
+                       w_start: (w_start + kernel_size)]  # N , 1, Cin, kH, kW
+
+            weight_ = weight[None, :, :, :, :]  # 1, Cout, Cin, kH, kW
+
+            # 卷积操作
+            out_result = sample_x * weight_ # N, Cout, Cin, KH, KW
+
+            # 把 Cin KH KW 相加 填入目标位置
+            output[:, :, i, j] = torch.sum(out_result, dim=(-3, -2, -1))
+
+    return output + (bias[:, None, None] if bias is not None else 0)  # 后对齐
+</code></pre>
+<h3 id="-">空洞卷积（膨胀卷积）</h3>
+<div align=center>
+
+<img src="./img/dilation.gif" alt="swin">
+
+<font size = 5> $s = 1, r = 2（表示两个kernel元素距离）,p = 0, k = 3$ </font>
+
+</div>
+
+<p>作用：增大感受野，保持原输入特征图的 $W、H$（通常设置 <strong>padding</strong> ）</p>
+<div id="group_conv"></div>
+
+<h3 id="-">组卷积</h3>
+<div align=center>
+
+<img src="./img/groupconv.png" alt="swin">
+
+<font size = 5> $s = 1, r = 2（表示两个kernel元素距离）,p = 0, k = 3$ </font>
+
+</div>
+
+<p>作用：
+减少参数量，相比不分组，则分 $g$ 个组的参数量则为不分组的 <strong>$\frac{1}{g}$</strong></p>
+<p>把 <strong>feature map</strong> 分组，每个卷积核只负责对应该组内的卷积</p>
+<h3 id="-">深度可分离卷积</h3>
+<h3 id="-">不对称卷积</h3>
+<h3 id="-transposed-convolutional-">转置卷积（Transposed Convolutional）</h3>
+<div align=center>
+
+<img src="./img/tranconv_1.gif" alt="swin">
+
+<font size = 5> $s = 1, p = 0, k = 3$ </font>
+
+</div>
+
+<div align=center>
+
+<img src="./img/transconv_2.gif" alt="swin">
+
+<font size = 5> $s = 2, p = 0, k = 3$ </font>
+
+</div>
+
+<div align=center>
+
+<img src="./img/transconv_3.gif" alt="swin">
+
+<font size = 5> $s = 2, p = 1, k = 3$ </font>
+
+</div>
+
+<p>注意：</p>
+<ul>
+<li><strong>转置卷积不是卷积的逆运算</strong></li>
+<li><strong>转置卷积也是卷积</strong></li>
+</ul>
+<p>作用：</p>
+<ul>
+<li><strong>上采样（upsampling）</strong></li>
+</ul>
+<p>Step：</p>
+<ul>
+<li><strong>在输入特征图元素间填充 $s-1 $ 行、$s-1 $列 $0$</strong></li>
+<li><strong>在输入特征图四周填充 $k-p-1$ 行、$k-p-1$ 列 $0$</strong></li>
+<li><strong>将卷积核参数上下、左右翻转</strong></li>
+<li><strong>做正常卷积运算（填充 $0$，步距 $1$，这里的步距并不是上述所说转置卷积的s，而是正常卷积的新步距）</strong></li>
+</ul>
+<div align=center>
+
+$H_{out} = (H_{in} - 1) \ times stride[0] - 2 \ times padding[0] + kernel _ size[0]$
+
+$W_{out} = (W_{in} - 1) \ times stride[1] - 2 \ times padding[1] + kernel _ size[1]$
+
+</div>
+
+<h3 id="-">转置卷积的高效操作</h3>
+<div align=center>
+
+<img src="./img/efficent_conv_1.png" alt="swin">
+<font size = 5> $把卷积核填入全为0的矩阵对应位置生成稀疏矩阵$ </font>
+</div>
+<div align=center>
+
+<img src="./img/efficent_conv_2.png" alt="swin">
+<font size = 5> $把输入特征图展平$ </font>
+</div>
+<div align=center>
+
+<img src="./img/efficent_conv_3.png" alt="swin">
+<font size = 5> $把每个位置生成的稀疏矩阵展平再拼接$ </font>
+</div>
+<div align=center>
+
+<img src="./img/efficent_conv_4.png" alt="swin">
+<font size = 5> $矩阵乘$ </font>
+</div>
+
+<div align=center>
+
+<img src="./img/efficent_conv_5.png" alt="swin">
+<font size = 5> $O^{1\times4} C^T = P ^{1\times 16} \not ={ I ^{1\times 16}}$ </font>
+</div>
+
+<div align=center>
+
+<img src="./img/img.gif" alt="swin">
+
+</div>
+
+<h2 id="alexnet">AlexNet</h2>
+<h3 id="-">网络结构</h3>
+<div align=center>
+
+<img src="./img/AlexNet.png" alt="swin">
+
+</div>
+
+<h3 id="-">亮点</h3>
+<ul>
+<li><strong>*首次利用 </strong>GPU<strong> 进行网络加速训练。*</strong></li>
+<li><strong><em>使用了 <a href="#relu">ReLU</a> 激活函数，而不是传统的 <a href="#sigmoid"> $Sigmoid$ </a> 激活函数以及 <a href="#tanh"> $Tanh$ </a> 激活函数。</em></strong></li>
+<li><strong>*使用了 </strong>LRN<strong> 局部响应归一化。*</strong></li>
+<li><strong>*在全连接层的前两层中使用了 </strong>Dropout<strong> 随机失活神经元操作，以减少过拟合。*</strong></li>
+</ul>
+<p>LRN：</p>
+<div align=center>
+
+  $$b_{x,y}^i = \Bigg(\frac{a_{x,y}^i}{\alpha \sum^{min(N-1,i + n / 2)}_{j = max(0,i - n / 2)}(a_{x,y}^i)^2} + k \Bigg)^\beta$$
+
+</div>
+
+<p>从附近的 <strong>channel</strong> 中 不同 <strong>feature map</strong>中的相同位置进行归一化，以如下 $4$ 个<strong>feature map</strong> 为例：</p>
+<div align=center>
+
+<img src="./img/LRN.png" alt="swin">
+</div>
+
+<p><strong>LRN</strong> 的作用：防止过拟合</p>
+<p>但是在 <strong>VGG</strong> 中被证明 其实并没有什么用</p>
+<h2 id="vggnet">VGGNet</h2>
+<h3 id="-">网络结构</h3>
+<div align=center>
+
+<img src="./img/VGGnet.png" alt="swin">
+
+</div>
+
+<h3 id="-">亮点</h3>
+<ul>
+<li><strong><em>通过堆叠多个$3\times3$的卷积核来代替大尺寸的卷积核，论文中提到：可以通过两个$3\times3$的卷积核来代替一个$5\times5$的卷积核，通过堆叠三个$3\times3$的卷积核来代替一个$7\times7$的卷积核，因为他们具有相同的感受野。</em></strong></li>
+</ul>
+<p>感受野计算公式：</p>
+<div align=center>
+
+$F(i) = [F(i + 1) - 1] \times Stride + Kernel_Size (F(i) 表示 第i层的感受野)$
+
+</div>
+
+
+
+<h2 id="googlenet">GoogLeNet</h2>
+<div align=center>
+
+<img src="./img/GoogLeNet.png" alt="swin">
+
+</div>
+
+<h3 id="incetption-v1">Incetption v1</h3>
+<div align=center>
+
+<img src="./img/inception_v1.JPG" alt="swin">
+
+</div>
+
+<h4 id="-">亮点</h4>
+<ul>
+<li><strong><em>引入了Inception结构（融合不同尺度的特征信息）</em></strong></li>
+<li><strong><em>使用1x1的卷积核进行降维以及映射处理，vgg网络中也有使用，这里给出了详细介绍</em></strong></li>
+<li><strong><em>添加两个辅助分类器帮助训练</em></strong></li>
+<li><strong><em>丢弃全连接层，使用平均池化层（大大减少模型参数）</em></strong></li>
+</ul>
+<h4 id="-">结构</h4>
+<p>与以往的串联的结构不同，<strong>Inception</strong> 结构采用的是多分支的并行结构，$a$ 分为 $4$ 个分支最左侧采用$1\times1$的卷积，第二个分支为$3\times3$的卷积，第三个分支为$5\times5$的卷积，第四个分支为一个$3\times3$的 <strong>max pooling</strong> ，$b$ 在 $a$ 的基础上再第二个和第三个分支的前面加了以$1\times1$的卷积核进行降维，第四个分支在 <strong>max pooling</strong> 层的后面接了一个$1\times1$的卷积，最后把所有分支的结果进行 $Concat$。采用$1\times1$的卷积是为了降维，以降低参数量，第四个分支的卷积在池化后面也是为了降低参数量，先 <strong>pooling</strong> 再 <strong>conv</strong> 可以降低 <strong>conv</strong> 的参数量。</p>
+<h4 id="-">辅助分类器</h4>
+<div align=center>
+
+<img src="./img/assistant.png" alt="swin">
+
+</div>
+
+
+<p>在 <strong>Inception 4(a)</strong> 和 <strong>Inception 4(d)</strong> 的后面都接了一个辅助分类器，两个辅助分类器一样，都是先经过一个$5\times5$ 步距为3的平均池化，在经过一个$1\times1$ 步距为1的卷积层，再经过两个全连接层，最后通过 <strong>softmax</strong> 进行输出预测</p>
+<h3 id="incetption-v2">Incetption v2</h3>
+<div align=center>
+
+<img src="./img/Inception_v2.png" alt="swin">
+
+</div>
+
+<p>在V1的基础上:</p>
+<ul>
+<li><strong><em>采用了之前vgg网络的通过两个$3\times3$的卷积堆叠来代替$5\times5$的卷积来代减少参数量</em></strong></li>
+<li><strong><em>创新性的用了$1\times3 ，3 \times 1$的不对称卷积，同样可以用 $1\times n ，n \times 1$来降低参数量</em></strong></li>
+</ul>
+<h3 id="incetption-v3">Incetption v3</h3>
+<p>在V2的基础上:</p>
+<ul>
+<li><strong><em>在辅助分类器中采用了 <a href="#bn">Batch Normalization</a></em></strong></li>
+</ul>
+<h3 id="incetption-v4">Incetption v4</h3>
+<div align=center>
+
+<img src="./img/Inception_v4.png" alt="swin">
+
+</div>
+
+<p>在V3的基础上：</p>
+<ul>
+<li><strong><em>引用了残差结构，设计了多种Inception-ResNet结构</em></strong></li>
+</ul>
+<h2 id="resnet">ResNet</h2>
+<div align=center>
+
+<img src="./img/resnet.jpg" alt="swin">
+<img src="./img/residual_unit.png" alt="swin">
+
+</div>
+
+<h3 id="-">亮点</h3>
+<ul>
+<li><strong><em>超深的网络结构(突破1000层)，解决了模型退化的问题</em></strong></li>
+<li><strong><em>提出residual模块，解决了梯度消失的问题</em></strong></li>
+<li><strong><em>使用Batch Normalization加速训练(丢弃dropout)</em></strong></li>
+</ul>
+<h3 id="-">残差结构</h3>
+<div align=center>
+
+<img src="./img/residual.png" alt="swin">
+
+</div>
+
+<p>左侧是ResNet 18/34的残差结构，右侧是ResNet  $50/101/152$ 的残差结构，其中右侧$1\times1$的卷积使用来升降维的，右侧的结构是输入channel为 $256$，经过一个 $64$ 个$1\times1$的卷积对输入特征图进行降维，再经过一个$3\times3$的提却特征，最后经过一个$1\times1$的升维回 $256$ 再与原来的输入进行相加后再relu激活。</p>
+<h3 id="-">反向传播</h3>
+<div align=center>
+
+$y_l = h(x_l) + F(x_l,W_l)$
+$x_{l+1} = f(y_l)$
+
+</div>
+
+<p>其中 $x_l$ 和 $x_{l+1}$ 分别表示的是第 $l$ 个残差单元的输入和输出，注意每个残差单元一般包含多层结构。 $F$ 是残差函数，表示学习到的残差，而 $h(x_l) = x_l$ 表示恒等映射， $f$ 是ReLU激活函数。基于上式，我们求得从浅层 $l$ 到深层 $L$ 的学习特征为：</p>
+<div align=center>
+
+$$x_L = x_l + \sum_{i=1}^{L-1} F(x_i,W_i)$$
+
+</div>
+
+<p>根据链式求导法则，可以求得反向过程的梯度</p>
+<div align=center>
+
+$$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot \frac{\partial x_L}{\partial x_l} = (1 + \frac{\partial }{ \partial x_l} \sum_{i=l}^{L-1}F(x_i,W_i)) $$
+
+</div>
+
+<p>式子的第一个因子 <strong>$\frac{\partial loss}{\partial x_L}$</strong> 表示的损失函数到达 $L$ 的梯度，小括号中的1表明短路机制可以无损地传播梯度，而另外一项残差梯度则需要经过带有 <strong>weights</strong> 的层，梯度不是直接传递过来的。残差梯度不会那么巧全为 $-1$，而且就算其比较小，有1的存在也不会导致梯度消失。所以残差学习会更容易。要注意上面的推导并不是严格的证明。</p>
+<h3 id="-resnet">不同深度的ResNet</h3>
+<div align=center>
+
+<img src="./img/resnet_dif_layers.jpg" alt="swin">
+
+</div>
+
+
+
+<h2 id="resnext">ResNeXt</h2>
+<h3 id="-"><a href="#group_conv">组卷积</a></h3>
+<div align=center>
+
+<img src="./img/resnext.PNG" alt="swin">
+
+</div>
+
+<p>更新了resnet 50及更深的网络的block</p>
+<div align=center>
+
+<img src="./img/resnext_equi.PNG" alt="swin">
+
+</div>
+
+<p>上面的 $3$ 种结构在数学计算上是完全等价的，$b$ 的第一层为32组$1\times1$的 <strong>output channel</strong> 为 $4$ 的卷积，$c$ 的第一层为 $128$ 个 $1\times1$的卷积，是等价的，同样的，$b$ 的第二层为32组 $3\times3$的 <strong>output channel</strong> 为 $4$ 的卷积,再 <strong>channel</strong> 方向进行拼接为 $128$ 的特征层，$c$ 的第二层为 $128$ 个$3\times3$的卷积，最后都经过 $256$ 个$1\times1$的卷积升维回 $256维$，$a$ 种的第三层等价于 $b$ 中的 $concat$ 和升维操作。</p>
+<h3 id="resnet-resnext-">resnet 与 resnext结构的对比</h3>
+<div align=center>
+
+<img src="./img/resnext_vs_resnet.jpg" alt="swin">
+
+</div>
+
+
+<h2 id="mobilenet">MobileNet</h2>
+<p><strong>MobileNet</strong> 网络是由google团队在2017年提出的，专注于移动端或者嵌入式设备中的轻量级CNN网络。相比传统卷积神经网络，在准确率小幅降低的前提下大大减少模型参数与运算量。(相比 <strong>VGG16</strong> 准确率减少了$ 0.9\% $，但模型参数只有 <strong>VGG</strong> 的 $1/32$ )</p>
+<h3 id="v1">V1</h3>
+<h4 id="-">亮点</h4>
+<ul>
+<li><strong><em>Depthwise Convolution(大大减少运算量和参数数量)</em></strong></li>
+<li><strong><em>增加超参数α、β(α是控制卷积核个数的倍率银子，β是控制分辨率的因子)</em></strong></li>
+</ul>
+<h4 id="depthwise-separable-convolution">Depthwise Separable Convolution</h4>
+<h5 id="depthwise-convolution">Depthwise Convolution</h5>
+<div align=center>
+
+<img src="./img/depthwise_conv.png" alt="swin">
+
+</div>
+
+
+<p>普通卷积的卷积核的 <strong>channel(input channel)</strong> 与 输入特征层的 <strong>channel</strong> 一致，输出特征层的<strong>channel</strong> 与 卷积核的个数一样。<strong><em>深度卷积的卷积核的 channel 为 1，输入特征矩阵的 channel = 卷积核个数 = 输出特征矩阵的 channel。（每一个卷积核只负责对一个特征层channel进行卷积，然后对应输出一个特征层）</em></strong></p>
+<h5 id="pointwise-convolution">Pointwise Convolution</h5>
+<div align=center>
+
+<img src="./img/depthwise_separable_conv.png" alt="swin">
+
+</div>
+
+<p>其实就是<strong>kernel_size</strong> 为 $1$ 的普通卷积，<strong>Pointwise Convolution</strong> 通常和 <strong>Depthwise Convolution</strong> 一起使用来构成 <strong>Depthwise Separable Convolution</strong></p>
+<p>对比普通卷积减少的参数量如下：</p>
+<div align=center>
+
+<img src="./img/mobilenet_para.png" alt="swin">
+
+</div>
+
+<h3 id="v2">V2</h3>
+<h4 id="-">亮点</h4>
+<ul>
+<li><strong><em>Inverted Residuals（倒残差结构）</em></strong></li>
+<li><strong><em>Linear Bottlenecks</em></strong></li>
+</ul>
+<h4 id="inverted-residuals">Inverted Residuals</h4>
+<div align=center>
+
+<img src="./img/reverted_residual.png" alt="swin">
+
+</div>
+
+<p><strong>residual block</strong> 先采用$1\times1$的卷积进行降维，再通过$3\times3$的卷积提取特征，最后通过$1\times1$的卷积进行升维，先降后升是为了减少参数量，而 <strong>Inverted Residuals block</strong> 则相反，先通过$1\times1$的卷积进行升维，再通过DW卷积进行提取特征，最后通过$1\times1$的卷积进行降维，因为 <strong>DW卷积</strong> 对比普通卷积已经减少了很多参数量，这里采用先升后降是为了更好的提取特征。</p>
+<h4 id="linear-bottlenecks">Linear Bottlenecks</h4>
+<div align=center>
+
+<img src="./img/linear_bottleneck.png" alt="swin">
+
+</div>
+
+<p>论文中验证了 <strong>ReLU</strong> 激活函数对低维特征信息照成大量损失，而 <strong>Inverted Residuals</strong> 的最后输出就是低维特征，所以 <strong>Inverted Residuals</strong> 的最后的激活函数是一个线性的激活函数。</p>
+<h2 id="densenet">DenseNet</h2>
+<div align=center>
+
+<img src="./img/densenet.jpg" alt="swin">
+
+</div>
+
+<h3 id="-">亮点</h3>
+<ul>
+<li><p><strong><em>减轻了梯度消失</em></strong>。</p>
+</li>
+<li><p><strong><em>加强了 feature 的传递</em></strong></p>
+</li>
+<li><p><strong><em>加强了特征的重用</em></strong></p>
+</li>
+<li><p><strong><em>一定程度上减少了参数数列</em></strong>。</p>
+<h3 id="-resnet">对比ResNet</h3>
+</li>
+</ul>
+<p>假设输入为一个图片 $X_0$ , 经过一个L层的神经网络, 其中第i层的非线性变换记为 $H_i(<em>)$ , $H_i(</em>)$ 可以是多种函数操作的累加如 <strong>BN、ReLU、Pooling或Conv</strong> 等. 第 $i$ 层的特征输出记作 $X_i$ .</p>
+<p>传统卷积前馈神经网络将第i层的输出 $X_i$ 作为i+1层的输入,可以写作$X_i = H_i(X_{i- 1})$. 
+<strong>ResNet</strong> 增加了旁路连接,可以写作 $X_l = H_l(X_{l - 1}) + X_{l-1}$.
+<strong>DenseNet</strong> 如上图所示,第 $i$ 层的输入不仅与 $i-1$ 层的输出相关,还有所有之前层的输出有关.记作:$X_l = H_l \: Concat([X_0,X_1,...,X_{i-1}])$ ,既将 $X_0$ 到 $X_1$ 层的所有输出 <strong>feature map</strong>按<strong>Channel</strong> 组合在一起.这里所用到的非线性变换H为$BN+ReLU+ Conv(3×3)$的组合</p>
+<p>由于在 <strong>DenseNet</strong> 中需要对不同层的 <strong>feature map</strong> 进行 $Concat$ 操作,所以需要不同层的 <strong>feature map</strong> 保持相同的 <strong>feature size</strong>,这就限制了网络中<strong>Down sampling</strong>的实现.为了使用 <strong>Down sampling</strong>,作者将 <strong>DenseNet</strong> 分为多个 <strong>Denseblock</strong>,如下图所示:</p>
+<div align=center>
+
+<img src="./img/dense_block.png" alt="swin">
+
+</div>
+
+<p>在同一个 <strong>Denseblock</strong> 中要求 <strong>feature size</strong> 保持相同大小,在不同 <strong>Denseblock</strong> 之间设置<strong>transition layers</strong> 实现 <strong>Down sampling</strong> , 在作者的实验中 <strong>transition layer</strong>由$BN + Conv(1×1) ＋2×2 average-pooling$组成.</p>
+<h1 id="-">目标检测主流模型</h1>
+<h2 id="two-stage">Two Stage</h2>
+<h3 id="rcnn-">RCNN系列</h3>
+<h4 id="rcnn">RCNN</h4>
+<h4 id="fast-rcnn">Fast RCNN</h4>
+<h4 id="faster-rnn">Faster RNN</h4>
+
+<div id="swinod"></div>
+
+<h3 id="swin-transformer-object-detection">Swin Transformer Object Detection</h3>
+<p><strong>Swin Transformer Object Detection</strong> 是基于 <strong>MMDetection</strong> 搭建的这里提供了两种目标检测的方法（<strong>Mask RCNN / Cascade Mask RCNN</strong>），这里以 <strong>Mask RCNN</strong> 为例，整体结构分为四个部分：<strong>backbone、neck、rpn head、roi head</strong>。</p>
+$$ Neck \left \{
+  \begin{aligned}
+  lateral \_ convs \\\\
+  fpn\_convs
+  \end{aligned}
+  \right.
+  $$
+<h4 id="backbone">BackBone</h4>
+<p>由四个 <strong>BasicLayer</strong> 组成，包含 <strong>blocks</strong> 和 <strong>patch merging</strong> 两个结构。<strong>blocks</strong> 中包含若干个基本 <strong>swin transformer</strong> 模块，<strong>patch merging</strong> 负责下采样，每经过一个 <strong>patch merging</strong> 特征图的宽高变为原来的一半，<strong>channel</strong> 变为原来的两倍。以输入图象 $（3，800，1216）$ 为例，首先经过<a href="#pp_le">patch partation &amp; linear embedding</a>变成$（96，200，304）$，依次输入4个 <strong>BasicLayer</strong> 。输出out依次为：$（1，96，200，304）$ $（1，192，100，152）$ $（1，384，50，76）$ $（1，768，25，38）$。将输出<strong>out</strong> 送进 <strong>FPN</strong> </p>
+<h4 id="neck">Neck</h4>
+<p>
+  $$ Neck \left \{
+    \begin{aligned}
+    lateral \_ convs \\\\
+    fpn\_convs
+    \end{aligned}
+    \right.
+    $$
+</p>
+<p><strong>Neck</strong> 为 <strong>FPN</strong> 结构，从 <strong>Backbone</strong> 的四个 <strong>Stage</strong> 每一层的输出形成一个金字塔结构，每个 <strong>stage</strong> 输出特征层的 <strong>channe</strong> l作为 <strong>FPN</strong> 的 <strong>input channel</strong>，<strong>FPN</strong>的<strong>output channel</strong>为$256$，输出特征层的数量为$5$。<strong>lateral_convs</strong>通过<strong>kernel size为1，stride为1的卷积</strong> 把四个 <strong>stage</strong>的<strong>channel</strong> $[96, 192, 384, 768]$，统一变成$256$，再通过<strong>fpn_convs</strong>用<strong>kernel size为3，stride为1，padding为1的卷积</strong> 对上述4个 <strong>channel</strong> 为$256$的特征图进行卷积，通过上层特征图通过双线性插值（<strong>F.interpolate</strong>）加到下一层特征图中，最后最上层特征图 $（25，38，256）$直接maxpool生成第五层特征图 $（13，19，256）$。这里共有五个特征层。</p>
+<h4 id="rpn-head">RPN Head</h4>
+<p>
+  $$ RPN \: Head \left\{
+    \begin{aligned}
+    rpn\_conv \\
+    rpn\_cls \\
+    rpn\_reg
+    \end{aligned}
+    \right.
+    $$
+</p>
+<p>这里 <strong>RPN</strong> 结构用三个卷积，把5层特征图—&gt;分类和回归，<strong>rpn_conv</strong> 为 <strong>Conv2d($256, 256$, kernel_size=($3, 3$), stride=($1, 1$), padding=($1, 1$))</strong> 用来提取特征，<strong>rpn_cls</strong> 为 <strong>Conv2d($256, 3$, kernel_size=($1, 1$), stride=$(1, 1$))</strong> 用来分类，这里<strong>out_channel</strong> 为 $3$ 表示 $3$ 个<strong>anchor</strong> 尺度分别为 $（2:1，1:1，1:2）$，<strong>rpn_reg</strong> 为 <strong>Conv2d($256, 12$, kernel_size=($1, 1$), stride=($1, 1$))</strong> 用来对bbox回归，<strong>out_put channel</strong> 代表：($4$个坐标值*$3$ anchor）。</p>
+<p>具体运算细节为：根据 <strong>score</strong>(如$200，308，256$)分数得到每层前$1000$个目标，然后加一起，得到<strong>bbox</strong>：$（4741，5）$（因为第五层只有$13 <em>19 </em>3$，只有$741$个，不足$1000$个目标）。最后送入<strong>NMS</strong>得到$1426$个目标，只选$1000$ 个得到最后输出的Rois：$（1000，5）$</p>
+<h4 id="roi-head">ROI Head</h4>
+<p>通过计算 <strong>rois</strong> 中目标的面积，将其分配到5层特征图</p>
+<p>$$
+  \begin{aligned}
+  \bigg[ \log_2 (\frac{S_{1000}}{56+ \epsilon})\bigg]_{floor}
+\end{aligned}
+$$</p>
+<p><strong>$S_{1000}$</strong> 表示 $1000$ 个候选框的面积，$56+ \epsilon$ 是已经调到最好的尺度比例，$\epsilon $ 为 $1e-6$，这个公式用来判断每一个面积属于哪一个特征层。</p>
+<p>通过</p>
+<pre><code class="lang-python"># 循环5层特征图i：
+roi_feats_t = self.roi_layers[i]（feats[i],rois）
+# self.roi_layers：
+                  RoIAlign(out=(7,7,scale=0.25)
+                  RoIAlign(out=(7,7,scale=0.125)
+                  RoIAlign(out=(7,7,scale=0.0625) 
+                  RoIAlign(out=(7,7,scale=0.03175)
+</code></pre>
+<p>以第一层特征图为例，<strong>feats[i]</strong> 为$（1，200，304，256$）,<strong>rois</strong>为$（689，5）$。$689$是从$1000$个感兴趣区域中计算出的属于第一层特征图的目标。
+输出 <strong>roi_feats_t</strong> 维度为$(689,256,7,7)$。
+最终输出 <strong>roi_feats</strong> 维度为$（1000，256，7，7）$</p>
+<p>最后再对特征图$(1000,256,7,7,)$：分类+回归</p>
+<pre><code class="lang-python">cls_score,bbox_pred = self.bbox_head(bbox_feats)
+# (1000,81)  (1000,320)
+det_bbox,det_label = multiclass_nms(bbox,score)
+# (57,5) (57) 
+</code></pre>
+<h2 id="one-stage">One Stage</h2>
+<h3 id="ssd-">SSD系列</h3>
+<h4 id="ssd">SSD</h4>
+<h4 id="dssd">DSSD</h4>
+<h3 id="retinanet">RetinaNet</h3>
+<h3 id="yolo-">Yolo系列</h3>
+<h4 id="yolov1">Yolov1</h4>
+<h4 id="yolov2">Yolov2</h4>
+<h4 id="yolov3">Yolov3</h4>
+<h4 id="yolov3-spp">Yolov3 spp</h4>
+<h4 id="yolov4">Yolov4</h4>
+<h4 id="yolov5">Yolov5</h4>
+<div id="focus"></div>
+
+<h3 id="detr">DETR</h3>
+<hr>
+<h1 id="rnn-">RNN系列</h1>
+<h2 id="rnn">RNN</h2>
+<h2 id="lstm">LSTM</h2>
+<h2 id="gru">GRU</h2>
+<h2 id="bilstm">BiLSTM</h2>
+<hr>
+<h1 id="-">神经网络知识</h1>
+<h2 id="-">梯度消失梯度爆炸</h2>
+<h2 id="-">激活函数</h2>
+<div id="sigmoid"></div>
+
+<h3 id="sigmoid">Sigmoid</h3>
+<div id="tanh"></div>
+
+<h3 id="tanh">Tanh</h3>
+<div id="relu"></div>
+
+<h3 id="relu">ReLU</h3>
+<h3 id="leakyrelu">LeakyReLU</h3>
+<h3 id="gelu">GeLU</h3>
+<h3 id="mish">Mish</h3>
+<h2 id="normalization">Normalization</h2>
+<div id="bn"></div>
+
+<h3 id="batch-normalization">Batch Normalization</h3>
+<div id="ln"></div>
+
+<h3 id="layer-normalization">Layer Normalization</h3>
+<div id="bn_vs_ln"></div>
+
+<h3 id="instance-normalization">Instance Normalization</h3>
+<h3 id="group-normalization">Group Normalization</h3>
+<h2 id="-">正则</h2>
+<h2 id="-">损失函数</h2>
+<h2 id="-">优化器</h2>
+<div id="attn"></div>
+
+<h2 id="attention">Attention</h2>
+<hr>
+<h1 id="-">机器学习</h1>
+<hr>
+<h1 id="-">图像处理知识</h1>
+
+          	</article>
+        </div>
+		</div>
+  </body>
+</html>
+<script type="text/javascript" src="toc/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="toc/js/jquery.ztree.all-3.5.min.js"></script>
+<script type="text/javascript" src="toc/js/ztree_toc.js"></script>
+<script type="text/javascript" src="toc_conf.js"></script>
+<script src="https://cdn.bootcss.com/mathjax/2.7.2/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    showProcessingMessages: false, //关闭js加载过程信息
+    messageStyle: "none", //不显示信息
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX", "output/HTML-CSS"],
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ], //行内公式选择符
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ], //段内公式选择符
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], //避开某些标签
+        ignoreClass:"comment-content" //避开含该Class的标签
+    },
+    "HTML-CSS": {
+        availableFonts: ["STIX","TeX"], //可选字体
+        showMathMenu: false //关闭右击菜单显示
+    }
+});
+MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+</script>
+<SCRIPT type="text/javascript" >
+<!--
+$(document).ready(function(){
+    var css_conf = eval(markdown_panel_style);
+    $('#readme').css(css_conf)
+    
+    var conf = eval(jquery_ztree_toc_opts);
+		$('#tree').ztree_toc(conf);
+});
+//-->
+</SCRIPT>
