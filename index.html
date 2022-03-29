@@ -457,17 +457,17 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 
 <p><strong>PYTORCH</strong> 参数：</p>
 <ul>
-<li><p><strong>$in_channels (int)$</strong> – 输入特征图的维度</p>
+<li><p><strong>$in\_channels (int)$</strong> – 输入特征图的维度</p>
 </li>
-<li><p><strong>$out_channels (int)$</strong> – 输出特征图的维度</p>
+<li><p><strong>$out\_channels (int)$</strong> – 输出特征图的维度</p>
 </li>
-<li><p><strong>$kernel_size (int or tuple)$</strong> – 卷积核大小</p>
+<li><p><strong>$kernel\_size (int or tuple)$</strong> – 卷积核大小</p>
 </li>
 <li><p><strong>$stride (int or tuple, optional)$</strong> – 步距. 默认: 1</p>
 </li>
 <li><p><strong>$padding (int, tuple or str, optional)$</strong> – 填充添加到输入的所有四个边. 默认: 0</p>
 </li>
-<li><p><strong>$padding_mode (string, optional)$</strong> – &#39;zeros&#39;, &#39;reflect&#39;, &#39;replicate&#39; or &#39;circular&#39;. 默认: &#39;zeros&#39;</p>
+<li><p><strong>$padding\_mode (string, optional)$</strong> – &#39;zeros&#39;, &#39;reflect&#39;, &#39;replicate&#39; or &#39;circular&#39;. 默认: &#39;zeros&#39;</p>
 </li>
 <li><p><strong>$dilation (int or tuple, optional)$</strong> – 空洞卷积. 默认: 1</p>
 </li>
@@ -483,8 +483,8 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 </ul>
 <div align=center>
 
-  $$H_{out} = \lfloor \frac{H_{in} + 2 \times padding[0] - dilation[0] \times (kernel_size[0] - 1) - 1}{stride[0]} + 1\rfloor$$
-  $$W_{out} = \lfloor \frac{W_{in} + 2 \times padding[1] - dilation[1] \times (kernel_size[1] - 1) - 1}{stride[1]} + 1\rfloor$$
+  $$H_{out} = \lfloor \frac{H_{in} + 2 \times padding[0] - dilation[0] \times (kernel\_size[0] - 1) - 1}{stride[0]} + 1\rfloor$$
+  $$W_{out} = \lfloor \frac{W_{in} + 2 \times padding[1] - dilation[1] \times (kernel\_size[1] - 1) - 1}{stride[1]} + 1\rfloor$$
 
 
   可以简化为 $$N{out} = \lfloor \frac{N_{in} + 2 \times padding -  kernel _ size}{stride} + 1 \rfloor$$
@@ -595,9 +595,14 @@ def _conv2d(x: Tensor, weight: Tensor, bias: Tensor = None, stride: int = 1, pad
 <p>作用：
 减少参数量，相比不分组，则分 $g$ 个组的参数量则为不分组的 <strong>$\frac{1}{g}$</strong></p>
 <p>把 <strong>feature map</strong> 分组，每个卷积核只负责对应该组内的卷积</p>
-<h3 id="-">深度可分离卷积</h3>
+<h3 id="-">深度可分离卷积</a></h3>
+
+<a href="#dwsc">深度可分离卷积</a>
+
 <h3 id="-">不对称卷积</h3>
+<a href="#bdc">不对称卷积</a>
 <h3 id="-transposed-convolutional-">转置卷积（Transposed Convolutional）</h3>
+
 <div align=center>
 
 <img src="./img/tranconv_1.gif" alt="swin">
@@ -770,6 +775,7 @@ $F(i) = [F(i + 1) - 1] \times Stride + Kernel_Size (F(i) 表示 第i层的感受
 
 </div>
 
+<div id="bdc"></div>>
 <p>在V1的基础上:</p>
 <ul>
 <li><strong><em>采用了之前vgg网络的通过两个$3\times3$的卷积堆叠来代替$5\times5$的卷积来代减少参数量</em></strong></li>
@@ -877,6 +883,7 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 <li><strong><em>Depthwise Convolution(大大减少运算量和参数数量)</em></strong></li>
 <li><strong><em>增加超参数α、β(α是控制卷积核个数的倍率银子，β是控制分辨率的因子)</em></strong></li>
 </ul>
+<div id="dwsc"></div>
 <h4 id="depthwise-separable-convolution">Depthwise Separable Convolution</h4>
 <h5 id="depthwise-convolution">Depthwise Convolution</h5>
 <div align=center>
