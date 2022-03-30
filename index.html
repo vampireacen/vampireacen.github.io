@@ -1820,6 +1820,20 @@ $$ -1\le DIou \le 1$$</p>
 <li>EMA(Exponential Moving Average)，可以理解为给训练的参数加了一个动量，让它更新过程更加平滑。</li>
 <li>Mixed precision，混合精度训练，能够减少显存的占用并且加快训练速度，前提是GPU硬件支持。</li>
 <li>Evolve hyper-parameters，超参数优化，没有炼丹经验的人勿碰，保持默认就好。</li>
+
+<p>基于yolov3的消除网格敏感度的改进，如果某些极端情况，例如gt的中心坐标就是grid cell的左上角的话，$t_x,t_y$的sigmoid应该是为0的，由于sigmoid的函数的特点值为0是，$t_x,t_y应该是取负无穷的，所以作者加了scale缩放因子来平衡sigmoid因子，如下：</p>
+<div align=center>
+
+<img src="./img/yolov4_grid_cell.png" alt="image">
+
+</div>
+
+<p>对于上说所scale为2，所以其范围是$[-0.5，1.5]$之间，所以在匹配正负样本的template也做了调整，在原grid cell的基础上在其上方和左侧又扩充了一个grid cell，所以正样本也就增加了。</p>
+<div align=center>
+
+<img src="./img/yolov4_template.png" alt="image">
+
+</div>
 </ul>
 <h5 id="loss">Loss</h5>
 <div align=center>

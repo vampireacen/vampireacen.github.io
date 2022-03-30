@@ -1956,6 +1956,24 @@ Focus的计算量和参数量要比普通卷积要多一些，是普通卷积的
 - Mixed precision，混合精度训练，能够减少显存的占用并且加快训练速度，前提是GPU硬件支持。
 - Evolve hyper-parameters，超参数优化，没有炼丹经验的人勿碰，保持默认就好。
 
+基于yolov3的消除网格敏感度的改进，如果某些极端情况，例如gt的中心坐标就是grid cell的左上角的话，$t_x,t_y$的sigmoid应该是为0的，由于sigmoid的函数的特点值为0是，$t_x,t_y应该是取负无穷的，所以作者加了scale缩放因子来平衡sigmoid因子，如下：
+
+<div align=center>
+
+![image](./img/yolov4_grid_cell.png)
+
+</div>
+
+对于上说所scale为2，所以其范围是$[-0.5，1.5]$之间，所以在匹配正负样本的template也做了调整，在原grid cell的基础上在其上方和左侧又扩充了一个grid cell，所以正样本也就增加了。
+
+<div align=center>
+
+![image](./img/yolov4_template.png)
+
+</div>
+
+
+
 ##### Loss
 
 <div align=center>
