@@ -581,6 +581,8 @@ def _conv2d(x: Tensor, weight: Tensor, bias: Tensor = None, stride: int = 1, pad
 </div>
 
 <p>作用：增大感受野，保持原输入特征图的 $W、H$（通常设置 <strong>padding</strong> ）</p>
+<p>优点：在不做池化损失信息的情况下，加大感受野，让每个卷积的输出都包含较大范围的信息
+  缺点：网格效应如果仅仅多次叠加多个 dilation rate=2 的 3x3 的卷积核时，会发现：并不是所有的输入像素都得到计算，也就是卷积核不连续。这对于逐像素的预测任务来说，是致命的问题</p>
 <div id="group_conv"></div>
 
 <h3 id="-">组卷积</h3>
