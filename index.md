@@ -1972,7 +1972,13 @@ Focus的计算量和参数量要比普通卷积要多一些，是普通卷积的
 
 </div>
 
+对于gt的中心点，在当前gridcell的左上角的时候，就往上左扩充一个grid cell，对于在右下角的情况就往右下扩充一个grid，以此类推
 
+<div align=center>
+
+![image](./img/yolov4_template_2.png)
+
+</div>
 
 ##### Loss
 
