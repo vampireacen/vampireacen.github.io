@@ -1491,7 +1491,13 @@ Yolov1的Loss即 x，y，w，h的bbox损失，正负样本的confidence损失，
 
 <p>对于每个 anchor 预测 $4 + 1 + 80$，4表示4个坐标的偏移量，1表示confidence，80代表coco数据集的类别，所以对于一个$N\times N$的特征图，预测3个scale，共有$N\times N \times 3 (4 + 1 + 80)$( $N \in {13,26,52 }$)</p>
 <h5 id="-">采样</h5>
-<p>对于每一个gt只选取得分最大的anchor，如果由anchor不是最大但是超过了给定阈值那么则直接丢弃，对于既不是正样本也不是负样本的anchor ，它既没有类别损失也没有定位损失，只有confidence损失</p>
+<p>对于每一个gt只选取得分最大的anchor，如果由anchor不是最大但是超过了给定阈值那么则直接丢弃，对于既不是正样本也不是负样本的anchor ，它既没有类别损失也没有定位损失，只有confidence损失，对于yolov3 u版的采样问题，是使用template计算IOU得出的，对于模板与gt的iou大于某一个阈值那么就认为是正样本，所以正样本得到了扩充，如下</p>
+<div align=center>
+
+<img src="./img/yolov3_template.png" alt="swin">
+
+</div>
+
 <h5 id="loss">Loss</h5>
 <div align=center>
 

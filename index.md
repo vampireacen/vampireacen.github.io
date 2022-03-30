@@ -1610,7 +1610,15 @@ yolov3在三层特征层上分别进行预测，同样使用kmeans聚类得到�
 
 ##### 采样
 
-对于每一个gt只选取得分最大的anchor，如果由anchor不是最大但是超过了给定阈值那么则直接丢弃，对于既不是正样本也不是负样本的anchor ，它既没有类别损失也没有定位损失，只有confidence损失
+对于每一个gt只选取得分最大的anchor，如果由anchor不是最大但是超过了给定阈值那么则直接丢弃，对于既不是正样本也不是负样本的anchor ，它既没有类别损失也没有定位损失，只有confidence损失，对于yolov3 u版的采样问题，是使用template计算IOU得出的，对于模板与gt的iou大于某一个阈值那么就认为是正样本，所以正样本得到了扩充，如下：
+
+<div align=center>
+
+![swin](./img/yolov3_template.png)
+
+</div>
+
+
 
 ##### Loss
 
