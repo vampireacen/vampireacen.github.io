@@ -1720,7 +1720,7 @@ $$ -1\le DIou \le 1$$</p>
 </ul>
 <div align=center>
 
-<img src="./img/SAT.png.png" alt="image">
+<img src="./img/SAT.png" alt="image">
 
 </div>
 
@@ -2432,9 +2432,32 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 <h2 id="-">损失函数</h2>
 <h3 id="softmax">softmax</h3>
 <p>$$softmax = \frac{e^{x_i}}{\sum_i e ^{x_i}}$$</p>
+
+<pre><code class="lang-python"># softmax
+  def softmax(x: Tensor) -> Tensor:
+    row_max = torch.max(x, dim=1, keepdim=True).values
+    x -= row_max
+    exp_x = torch.exp(x)
+    exp_sum = torch.sum(exp_x, dim=1, keepdim=True)
+    return exp_x / exp_sum
+
+</code></pre>
+
 <h3 id="bceloss">BCELoss</h3>
 <p>$$ BCE = - \frac{1}{N} \sum_i [y_i \cdot log(p_i) + (1 - y_i) log(1 - p_i)]$$</p>
 <h3 id="celoss">CELoss</h3>
+
+<pre><code class="lang-python"># cel：
+  def nllloss(x: Tensor, target: Tensor) -> Tensor:
+    return torch.mean(torch.tensor([-_x[t] for _x, t in zip(x, target)]))
+  
+  def CrossEntropyLoss(x: Tensor, target: Tensor) -> Tensor:
+    softmax_out = softmax(x)
+    log_out = torch.log(softmax_out)
+    nllloss_loss = nllloss(log_out, target)
+    return nllloss_loss
+</code></pre>
+
 <p>$$ CE = - \frac{1}{N} \sum_i \sum_{c=1}^M [y_{ic} \cdot log(p_{ic})]$$</p>
 <p>反向传播包括softmax：</p>
 <div align=center>
@@ -2599,6 +2622,31 @@ $$W_{t+1} = W_t - \frac{\alpha}{\sqrt{\hat{v_t} + \epsilon}} \cdot \hat{m_t}$$</
 <hr>
 <h1 id="-">机器学习</h1>
 <h2 id="-">朴素贝叶斯</h2>
+
+<div align=center>
+
+<img src="./img/naive_bayes.png" alt="swin">
+
+</div>
+
+<div align=center>
+
+<img src="./img/naive_bayes_1.png" alt="swin">
+
+</div>
+
+<div align=center>
+
+<img src="./img/naive_bayes__.png" alt="swin">
+  
+</div>
+
+<div align=center>
+
+<img src="./img/loglikelyhood.png" alt="swin">
+  
+</div>
+
 <h2 id="-">线性分类</h2>
 <h2 id="-">逻辑回归</h2>
 <h2 id="-">牛顿法</h2>

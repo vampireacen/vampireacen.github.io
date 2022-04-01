@@ -1853,7 +1853,7 @@ $$ DIoU = IoU - (\frac{d^2}{c^2} + \alpha v)$$
 
 <div align=center>
 
-![image](./img/SAT.png.png)
+![image](./img/SAT.png)
 
 </div>
 
