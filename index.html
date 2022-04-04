@@ -1328,9 +1328,10 @@ det_bbox,det_label = multiclass_nms(bbox,score)
 </ul>
 <h5 id="loss">Loss</h5>
 <p>$$L = \frac{1}{N}(L_{conf}(x,c) + \alpha L_{loc}(x,l,g)) $$</p>
-<p>$$L_{conf}(x,c) = -\sum_{i\subseteqq Pos} ^N x_{ij}^p log(\hat{c}<em>i^p) - \sum</em>{i\subseteqq Pos} log(\hat{c}_i^0)
-\: \: where \: \hat{c}_i^p = \frac{exp(c^p_i)}{\sum_p exp(c^p_i)}
-$$</p>
+<p>
+  $$L_{conf}(x,c) = -\sum_{i\subseteqq Pos} ^N x_{ij}^p log(\hat{c}_i^p) - \sum_{i\subseteqq Pos} log(\hat{c}_i^0)
+  \: \: where \: \hat{c}_i^p = \frac{exp(c^p_i)}{\sum_p exp(c^p_i)}
+  $$</p>
 <div align=center>
 
 <img src="./img/ssd_loss_1.png" alt="swin">

@@ -2,6 +2,7 @@
 <font face="黑体" size=7>
 
 **计算机视觉知识汇总**
+
 </font>
 </div>
 
@@ -74,9 +75,8 @@
 
 
 <div align=center> 
-
-**$MultiHead(Q,K,V) = Concat(head_1,head_2,...,head_h)W^O$**
-**$where head_i = Attention(QW_i^Q,KW_i^K,VW_i^V)$**
+**$$MultiHead(Q,K,V) = Concat(head_1,head_2,...,head_h)W^O$$**
+**$$where head_i = Attention(QW_i^Q,KW_i^K,VW_i^V)$$**
 
 </div>
 
@@ -1149,6 +1149,7 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 改进：
 - **ROI Align**
   
+
 1)**Conv layers** 使用的是 **VGG16** ，**feat_stride=32** (即表示，经过网络层后图片缩小为原图的 $1/32$),原图$800\times800$,最后一层特征图**feature map**大小:$25\times25$
 
 2)假定原图中有一 **region proposal** ，大小为 $665\times665$，这样，映射到特征图中的大小：$665/32=20.78,即20.78\times20.78$，此时，没有像 **RoiPooling** 那样就行取整操作，保留浮点数
@@ -1251,8 +1252,7 @@ $$L(\{p_i\},\{t_i\}) = \frac{1}{N_{cls}}\sum_i L_{cls}(p_i,p_i^*) + \lambda\frac
 
 $$L_{cls} = -[p_i^*log(p_i) + (1-p_i^*)log(1-p_i)]$$
 $$L_{reg} = \sum_i Smooth_{L_1}(t_i,t_i^*)$$
-
-$$ 
+$$
 smooth_{L_i}(x) =  \left \{
 \begin{aligned}
 0.5x^2  ,\: \:\:\: \:\:if|x|<1\\
@@ -1271,7 +1271,7 @@ $t_i^*$ 表示第$i$个anchor对应的真实 $Ground \:\: Truth \:\: Box$ 的回
 
 **Swin Transformer Object Detection** 是基于 **MMDetection** 搭建的这里提供了两种目标检测的方法（**Mask RCNN / Cascade Mask RCNN**），这里以 **Mask RCNN** 为例，整体结构分为四个部分：**backbone、neck、rpn head、roi head**。
 
-$$ 
+$$
 Mask \: RCNN 
 \left\{
 \begin{aligned}
@@ -1289,7 +1289,8 @@ $$
 
 #### Neck
 
-$$ Neck \left \{
+$$
+Neck \left \{
 \begin{aligned}
 lateral \_ convs \\\\
 fpn\_convs
@@ -1301,7 +1302,8 @@ $$
 
 #### RPN Head
 
-$$ RPN \: Head \left\{
+$$
+RPN \: Head \left\{
 \begin{aligned}
 rpn\_conv \\
 rpn\_cls \\
@@ -1430,7 +1432,6 @@ $$L = \frac{1}{N}(L_{conf}(x,c) + \alpha L_{loc}(x,l,g)) $$
 $$L_{conf}(x,c) = -\sum_{i\subseteqq Pos} ^N x_{ij}^p log(\hat{c}_i^p) - \sum_{i\subseteqq Pos} log(\hat{c}_i^0)
 \: \: where \: \hat{c}_i^p = \frac{exp(c^p_i)}{\sum_p exp(c^p_i)}
 $$
-
 <div align=center>
 
 ![swin](./img/ssd_loss_1.png)
@@ -2183,7 +2184,6 @@ p , if \quad  y = 1\\
 \end{aligned}
 \right.
 $$
-
 $$CE(p,y) = CE(pt) = -log(p_t)$$
 
 对于这种类别不均衡问题常用的方法是引入一个权重因子 $\alpha$ ，对于类别1的使用权重 $\alpha$ ，对于类别-1使用权重 $1-\alpha$ ，公式如下所示。但采用这种加权方式可以平衡正负样本的重要性，但无法区分容易分类的样本与难分类的样本。
@@ -2386,7 +2386,6 @@ $$ f'(x) = 1 - f^2(x)$$
 </div>
 
 函数
-
 $$
 f(x) =  \left \{
 \begin{aligned}
@@ -2395,9 +2394,7 @@ x  ,x \ge 0
 \end{aligned}
 \right.
 $$
-
 导数
-
 $$
 f'(x) =  \left \{
 \begin{aligned}
@@ -2406,7 +2403,6 @@ f'(x) =  \left \{
 \end{aligned}
 \right.
 $$
-
 #### 优点
 -  解决了gradient vanishing问题 (在正区间)
 - 计算速度非常快，只需要判断输入是否大于0
@@ -2431,7 +2427,6 @@ $$
 </div>
 
 函数
-
 $$
 f(x) =  \left \{
 \begin{aligned}
@@ -2440,7 +2435,6 @@ x  ,x \ge 0
 \end{aligned}
 \right.
 $$
-
 导数
 
 <div id="elu"></div>
@@ -2460,7 +2454,6 @@ $$
 </div>
 
 函数
-
 $$
 ELU =  \left \{
 \begin{aligned}
@@ -2469,9 +2462,7 @@ x  ,x \ge 0
 \end{aligned}
 \right.
 $$
-
 导数
-
 $$
 ELU'(x) =  \left \{
 \begin{aligned}
@@ -2480,7 +2471,6 @@ ELU(x) + \alpha ,x < 0\\
 \end{aligned}
 \right.
 $$
-
 <div id="mish"></div>
 
 ### Mish
@@ -2759,7 +2749,7 @@ def NMS(arr: np.ndarray, thresh: float) -> list:
 ### Soft NMS
 #### 原理
 对于 **Traditional NMS** 有：
-$$ 
+$$
 s_i =  \left \{
 \begin{aligned}
 0  ,IOU(M,B_i) \ge thresh\\
@@ -2767,12 +2757,10 @@ s_i  ,IOU(M,B_i) \ge thresh
 \end{aligned}
 \right.
 $$
-
 显然，对于 $IoU≥NMS$ 阈值的相邻框，**Traditional NMS** 的做法是将其得分 **暴力置0**。这对于有遮挡的案例较不友好。因此 **Soft-NMS** 的做法是采取 **得分惩罚机制**，使用一个与IoU正相关的惩罚函数对得分 s 进行惩罚，时期得分降低，并不是直接丢弃。
 
 线性惩罚：
-
-$$ 
+$$
 s_i =  \left \{
 \begin{aligned}
 s_i(1-IOU(M,B_i))  , \: IOU(M,B_i) \ge thresh\\
@@ -2780,7 +2768,6 @@ s_i  ,\: IOU(M,B_i) \ge thresh
 \end{aligned}
 \right.
 $$
-
 但是，上式并不是一个连续的函数，**不光滑**，当一个边框与M的重叠IoU超过阈值Nt时，其得分会发生跳变，这种跳变会对检测结果产生较大的波动。
 因此还需要寻找一个更为稳定、连续的得分重置函数，最终Soft NMS给出了如下式所示的重置函数。高斯Soft NMS计算公式：
 $$s_i = s_i\cdot e^{-\frac{IOU(M,B_i)^2}{\sigma}}$$
@@ -2796,7 +2783,7 @@ $$s_i = s_i\cdot e^{-\frac{IOU(M,B_i)^2}{\sigma}}$$
 
 ### DIOU NMS
 #### 原理
-$$ 
+$$
 s_i =  \left \{
 \begin{aligned}
 0  ,DIOU(M,B_i) \ge thresh\\
