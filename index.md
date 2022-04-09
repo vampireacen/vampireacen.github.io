@@ -1182,6 +1182,27 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 
 </div>
 
+<div align=center>
+
+![swin](./img/fast_rcnn_regression.png)
+
+</div>
+
+##### Loss
+
+<div align=center>
+
+![swin](./img/fast_rcnn_cls_loss.png)
+
+</div>
+
+<div align=center>
+
+![swin](./img/fast_rcnn_loc_loss.png)
+
+</div>
+
+[Smooth L1](#smoothl1)
 
 ##### 框架
 
@@ -1190,6 +1211,7 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 ![swin](./img/fast_rcnn_kj.png)
 
 </div>
+
 
 #### Faster RNN
 
@@ -1244,7 +1266,16 @@ $$Faster RCNN = PRN + Fast RCNN$$
 </div>
 
 ###### 采样
-对于正负样本的采样问题，随机选取 $256$ 个样本并且保持正样本和负样本的比例为 $1:1$，对于不足 $128$ 个正样本的情况，那么负样本也减至同样的数量
+对于正负样本的采样问题，随机选取 $256$ 个样本并且保持正样本和负样本的比例为 $1:1$，对于不足 $128$ 个正样本的情况，那么负样本也减至同样的数量。
+
+对于分配的正样本有两种策略：
+* 对于一个 **GT** 与他 **IOU** 最大的 **anchor** 分配为正样本
+* 对于任意一个 **anchor** 如果他与任意一个 **GT** 的 **IOU** 超过 $0.7$ 也分配为正样本
+
+对于负样本的分配：
+* 一个 **anchor** 与任意的 **GT** 的 **IOU** 都低于 0.3 则认为是负样本
+
+对于超过 $0.3$ 却低于 $0.7$ **iou** 值的 **anchor**不参与训练
 
 ###### 损失函数
 
@@ -1252,6 +1283,12 @@ $$L(\{p_i\},\{t_i\}) = \frac{1}{N_{cls}}\sum_i L_{cls}(p_i,p_i^*) + \lambda\frac
 
 $$L_{cls} = -[p_i^*log(p_i) + (1-p_i^*)log(1-p_i)]$$
 $$L_{reg} = \sum_i Smooth_{L_1}(t_i,t_i^*)$$
+$$t_i \in \{t_x,t_y,t_w,t_h\}$$
+$$lt_i^* \in \{t_x^*,t_y^*,t_w^*,t_h^*\}$$
+$$t_x = (x - x_a) / w_a \:,\: t_y = (y - y_a) / h_a$$
+$$t_w = log(w/w_a) \:,\: t_h = log(h/h_a)$$
+$$t_x^* = (x^* - x_a) / w_a \:,\: t_y^* = (y^* - y_a) / h_a$$
+$$t_w^* = log(w^*/w_a) \:,\: t_h^* = log(h^*/h_a)$$
 $$
 smooth_{L_i}(x) =  \left \{
 \begin{aligned}
@@ -1261,10 +1298,12 @@ smooth_{L_i}(x) =  \left \{
 \right.
 $$
 
+
+
 $p_i$ 表示第$i$个anchor预测为目标的概率
 $p_i^*$ 为正样本时为$1$，负样本时为$0$
-$t_i$ 表示第$i$个anchor的边界框回归参数
-$t_i^*$ 表示第$i$个anchor对应的真实 $Ground \:\: Truth \:\: Box$ 的回归参数
+$t_i$ 表示第$i$个anchor的边界框回归参数,$t_i$是通过预测得到的 通过上式还原回特征图的坐标和宽高，
+$t_i^*$ 表示第$i$个anchor对应的真实 $Ground \:\: Truth \:\: Box$ 的回归参数，$t_i^*$是通过GT在原特征图上的坐标和宽高，根据上式计算得到的，用来和$t_i$计算损失，回归边界框
 <div id="swinod"></div>
 
 ### Swin Transformer Object Detection
@@ -1611,7 +1650,7 @@ yolov3在三层特征层上分别进行预测，同样使用kmeans聚类得到�
 
 对于每个 anchor 预测 $4 + 1 + 80$，4表示4个坐标的偏移量，1表示confidence，80代表coco数据集的类别，所以对于一个$N\times N$的特征图，预测3个scale，共有$N\times N \times 3 (4 + 1 + 80)$( $N \in \{13,26,52 \}$)
 
-对于目标边界框的回归参数，$t_w,t_h,t_x,t_y$来说是基于grid的cell 的左上角来说的，而faster rcnn 、ssd都是基于anchor的，所以通过一个sigmoid函数把$t_x,t_y$的范围限制在$[0,1]之间。如下：
+对于目标边界框的回归参数，$t_x,t_y$来说是基于grid的cell 的左上角来说的，而faster rcnn 、ssd都是基于anchor的，所以通过一个sigmoid函数把$t_x,t_y$的范围限制在$[0,1]$之间。如下：
 
 <div align=center>
 
@@ -1619,6 +1658,14 @@ yolov3在三层特征层上分别进行预测，同样使用kmeans聚类得到�
 
 </div>
 
+对于faster rcnn 和 ssd的回归参数方程：
+
+$$ x = w_a t_x + x_a $$
+$$ y = h_a t_y + y_a $$
+$$ w = w_a e^{t_w }$$
+$$ h = h_a e^{t_h} $$
+
+**yolo** 中的坐标的是基于当前前 **cell** 的左上角的，且每一个 **grid**的范围都是$[0,1]$，所以如果不对$t_x,t_y$进行限制，并且再乘以一个系数的话会出现偏移出当前的**cell**的情况，这与**yolo**的如果一个目标落在一个**cel**l里那么这个**cell**就预测这个目标的初衷是违背的
 
 ##### 采样
 
@@ -2687,6 +2734,49 @@ $$MSE = \frac{1}{N} \sum (x_i)^2$$
 ### MAE(l1 loss)
 
 $$MSE = \frac{1}{N} \sum |x_i|$$
+
+<div id="smoothl1"></div>
+
+### Smooth L1 loss
+
+<div align=center>
+
+![smoothl1](./img/smooth_l1.png)
+
+</div>
+
+L2 L1 Smooth_L1 函数对比
+
+<div align=center>
+
+![smoothl1](./img/smooth_l1_l2.png)
+
+</div>
+
+L2 L1 Smooth_L1 梯度对比
+
+<div align=center>
+
+![smoothl1](./img/grad_smooth_l1_l2.png)
+
+</div>
+
+L2 L1 Smooth_L1 函数曲线
+
+<div align=center>
+
+![smoothl1](./img/smooth_l1_func.png)
+
+</div>
+
+优缺点：
+
+* 根据 $L2$ 的梯度公式，当 $x$ 增大时，$L2$ 的损失也增大。 这就导致在训练初期，预测值与 groud truth 差异过于大时，损失函数对预测值的梯度十分大，训练不稳定。
+* 根据 $L1$ 的梯度公式，$L1$ 对 $x$ 的导数为常数，在训练的后期，预测值与ground truth差异很小时，L1的导数的绝对值仍然为 $1$，而 learning rate 如果不变，损失函数将在稳定值附近波动，难以继续收敛以达到更高精度。
+* 根据 $Smooth \: L1$ 的梯度公式，$Smotth L1$ 在 $x$ 较小时，对 $x$ 的梯度也会变小。 而当 $x$ 较大时，对 $x$ 的梯度的上限为 $1$，也不会太大以至于破坏网络参数。$Smooth \: L1$完美的避开了L1和L2作为损失函数的缺陷。
+
+
+
 
 ## 后处理
 

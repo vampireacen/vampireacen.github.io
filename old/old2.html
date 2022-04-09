@@ -1,7 +1,7 @@
 <html>
   <head>
 	  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>计算机视觉知识汇总</title>
+    <title>i5ting_ztree_toc:index</title>
 		<link href="toc/style/github-bf51422f4bb36427d391e4b75a1daa083c2d840e.css" media="all" rel="stylesheet" type="text/css"/>
 		<link href="toc/style/github2-d731afd4f624c99a4b19ad69f3083cd6d02b81d5.css" media="all" rel="stylesheet" type="text/css"/>
 		<link href="toc/css/zTreeStyle/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
@@ -69,6 +69,7 @@
 <font face="黑体" size=7>
 
 <strong>计算机视觉知识汇总</strong>
+
 </font>
 </div>
 
@@ -133,9 +134,8 @@
 <li>$A4$: $q$ 和 $k$ 的各个分量是互相独立的随机变量，均值是0，方差是1，那么点积 $q·k$的均值是0，方差是$\sqrt{d_k}$，所以$\frac{QK^T - 0}{\sqrt{d_k}}$拉回到均值为0， 方差为1的标准正态分布，防止了数量级大使得梯度消失的情况。</li>
 </ul>
 <div align=center> 
-
-<strong>$MultiHead(Q,K,V) = Concat(head_1,head_2,...,head_h)W^O$</strong>
-<strong>$where head_i = Attention(QW_i^Q,KW_i^K,VW_i^V)$</strong>
+<strong>$$MultiHead(Q,K,V) = Concat(head_1,head_2,...,head_h)W^O$$</strong>
+<strong>$$where head_i = Attention(QW_i^Q,KW_i^K,VW_i^V)$$</strong>
 
 </div>
 
@@ -457,17 +457,17 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 
 <p><strong>PYTORCH</strong> 参数：</p>
 <ul>
-<li><p><strong>$in\_channels (int)$</strong> – 输入特征图的维度</p>
+<li><p><strong>$in_channels (int)$</strong> – 输入特征图的维度</p>
 </li>
-<li><p><strong>$out\_channels (int)$</strong> – 输出特征图的维度</p>
+<li><p><strong>$out_channels (int)$</strong> – 输出特征图的维度</p>
 </li>
-<li><p><strong>$kernel\_size (int or tuple)$</strong> – 卷积核大小</p>
+<li><p><strong>$kernel_size (int or tuple)$</strong> – 卷积核大小</p>
 </li>
 <li><p><strong>$stride (int or tuple, optional)$</strong> – 步距. 默认: 1</p>
 </li>
 <li><p><strong>$padding (int, tuple or str, optional)$</strong> – 填充添加到输入的所有四个边. 默认: 0</p>
 </li>
-<li><p><strong>$padding\_mode (string, optional)$</strong> – &#39;zeros&#39;, &#39;reflect&#39;, &#39;replicate&#39; or &#39;circular&#39;. 默认: &#39;zeros&#39;</p>
+<li><p><strong>$padding_mode (string, optional)$</strong> – &#39;zeros&#39;, &#39;reflect&#39;, &#39;replicate&#39; or &#39;circular&#39;. 默认: &#39;zeros&#39;</p>
 </li>
 <li><p><strong>$dilation (int or tuple, optional)$</strong> – 空洞卷积. 默认: 1</p>
 </li>
@@ -483,8 +483,8 @@ $[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 </ul>
 <div align=center>
 
-  $$H_{out} = \lfloor \frac{H_{in} + 2 \times padding[0] - dilation[0] \times (kernel\_size[0] - 1) - 1}{stride[0]} + 1\rfloor$$
-  $$W_{out} = \lfloor \frac{W_{in} + 2 \times padding[1] - dilation[1] \times (kernel\_size[1] - 1) - 1}{stride[1]} + 1\rfloor$$
+  $$H_{out} = \lfloor \frac{H_{in} + 2 \times padding[0] - dilation[0] \times (kernel_size[0] - 1) - 1}{stride[0]} + 1\rfloor$$
+  $$W_{out} = \lfloor \frac{W_{in} + 2 \times padding[1] - dilation[1] \times (kernel_size[1] - 1) - 1}{stride[1]} + 1\rfloor$$
 
 
   可以简化为 $$N{out} = \lfloor \frac{N_{in} + 2 \times padding -  kernel _ size}{stride} + 1 \rfloor$$
@@ -551,7 +551,6 @@ def _conv2d(x: Tensor, weight: Tensor, bias: Tensor = None, stride: int = 1, pad
 
     return output + (bias[:, None, None] if bias is not None else 0)  # 后对齐
 </code></pre>
-
 <p>卷积反向传播</p>
 <div align=center>
 
@@ -580,9 +579,9 @@ def _conv2d(x: Tensor, weight: Tensor, bias: Tensor = None, stride: int = 1, pad
 
 </div>
 
-<p>作用：增大感受野，保持原输入特征图的 $W、H$（通常设置 <strong>padding</strong> ）</p>
-<p>优点：在不做池化损失信息的情况下，加大感受野，让每个卷积的输出都包含较大范围的信息
-  缺点：网格效应如果仅仅多次叠加多个 dilation rate=2 的 3x3 的卷积核时，会发现：并不是所有的输入像素都得到计算，也就是卷积核不连续。这对于逐像素的预测任务来说，是致命的问题</p>
+<p>作用：增大感受野，保持原输入特征图的 $W、H$（通常设置 <strong>padding</strong> ）
+优点：在不做池化损失信息的情况下，加大感受野，让每个卷积的输出都包含较大范围的信息
+缺点：网格效应如果仅仅多次叠加多个 dilation rate=2 的 3x3 的卷积核时，会发现：并不是所有的输入像素都得到计算，也就是卷积核不连续。这对于逐像素的预测任务来说，是致命的问题</p>
 <div id="group_conv"></div>
 
 <h3 id="-">组卷积</h3>
@@ -597,14 +596,9 @@ def _conv2d(x: Tensor, weight: Tensor, bias: Tensor = None, stride: int = 1, pad
 <p>作用：
 减少参数量，相比不分组，则分 $g$ 个组的参数量则为不分组的 <strong>$\frac{1}{g}$</strong></p>
 <p>把 <strong>feature map</strong> 分组，每个卷积核只负责对应该组内的卷积</p>
-<h3 id="-">深度可分离卷积</a></h3>
-
-<a href="#dwsc">深度可分离卷积</a>
-
+<h3 id="-">深度可分离卷积</h3>
 <h3 id="-">不对称卷积</h3>
-<a href="#bdc">不对称卷积</a>
 <h3 id="-transposed-convolutional-">转置卷积（Transposed Convolutional）</h3>
-
 <div align=center>
 
 <img src="./img/tranconv_1.gif" alt="swin">
@@ -647,9 +641,9 @@ def _conv2d(x: Tensor, weight: Tensor, bias: Tensor = None, stride: int = 1, pad
 </ul>
 <div align=center>
 
-$$H_{out} = (H_{in} - 1) \ times stride[0] - 2 \ times padding[0] + kernel _ size[0]$$
+$H_{out} = (H_{in} - 1) \ times stride[0] - 2 \ times padding[0] + kernel _ size[0]$
 
-$$W_{out} = (W_{in} - 1) \ times stride[1] - 2 \ times padding[1] + kernel _ size[1]$$
+$W_{out} = (W_{in} - 1) \ times stride[1] - 2 \ times padding[1] + kernel _ size[1]$
 
 </div>
 
@@ -698,14 +692,14 @@ $$W_{out} = (W_{in} - 1) \ times stride[1] - 2 \ times padding[1] + kernel _ siz
 <h3 id="-">亮点</h3>
 <ul>
 <li><strong>*首次利用 </strong>GPU<strong> 进行网络加速训练。*</strong></li>
-<li><strong><em>使用了 <a href="#relu">ReLU</a> 激活函数，而不是传统的 <a href="#sigmoid">Sigmoid</a> 激活函数以及 <a href="#tanh">Tanh</a> 激活函数。</em></strong></li>
+<li><strong><em>使用了 <a href="#relu">ReLU</a> 激活函数，而不是传统的 <a href="#sigmoid">$Sigmoid$</a> 激活函数以及 <a href="#tanh">$Tanh$</a> 激活函数。</em></strong></li>
 <li><strong>*使用了 </strong>LRN<strong> 局部响应归一化。*</strong></li>
 <li><strong>*在全连接层的前两层中使用了 </strong>Dropout<strong> 随机失活神经元操作，以减少过拟合。*</strong></li>
 </ul>
 <p>LRN：</p>
 <div align=center>
 
-  $$b_{x,y}^i = \Bigg(\frac{a_{x,y}^i}{\alpha \sum^{min(N-1,i + n / 2)}_{j = max(0,i - n / 2)}(a_{x,y}^i)^2} + k \Bigg)^\beta$$
+$$b_{x,y}^i = \Bigg(\frac{a_{x,y}^i}{\alpha \sum^{min(N-1,i + n / 2)}<em>{j = max(0,i - n / 2)}(a</em>{x,y}^i)^2} + k \Bigg)^\beta$$
 
 </div>
 
@@ -777,7 +771,6 @@ $F(i) = [F(i + 1) - 1] \times Stride + Kernel_Size (F(i) 表示 第i层的感受
 
 </div>
 
-<div id="bdc"></div>>
 <p>在V1的基础上:</p>
 <ul>
 <li><strong><em>采用了之前vgg网络的通过两个$3\times3$的卷积堆叠来代替$5\times5$的卷积来代减少参数量</em></strong></li>
@@ -885,7 +878,6 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 <li><strong><em>Depthwise Convolution(大大减少运算量和参数数量)</em></strong></li>
 <li><strong><em>增加超参数α、β(α是控制卷积核个数的倍率银子，β是控制分辨率的因子)</em></strong></li>
 </ul>
-<div id="dwsc"></div>
 <h4 id="depthwise-separable-convolution">Depthwise Separable Convolution</h4>
 <h5 id="depthwise-convolution">Depthwise Convolution</h5>
 <div align=center>
@@ -1071,7 +1063,7 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 <p>原文中经过ROI pooling 将特征矩阵统一缩放成$7\times7$大小，这里为了方便理解以 $2\times2$ 为例</p>
 <div align=center>
 
-<img src="./img/roi_feature.jpg" alt="swin">
+<img src="./img/ROI_feature.jpg" alt="swin">
 
 </div>
 
@@ -1141,13 +1133,13 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 </div>
 
 <p><a href="#smoothl1">Smooth L1</a></p>
-
 <h5 id="-">框架</h5>
 <div align=center>
 
 <img src="./img/fast_rcnn_kj.png" alt="swin">
 
 </div>
+
 
 <h4 id="faster-rnn">Faster RNN</h4>
 <div align=center>
@@ -1156,7 +1148,7 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 
 </div>
 
-<p>$$Faster RCNN = RPN + Fast RCNN$$</p>
+<p>$$Faster RCNN = PRN + Fast RCNN$$</p>
 <h5 id="region-proposal-network">Region Proposal Network</h5>
 <h6 id="-">原理</h6>
 <p><strong>rpn</strong> 网络可以通过 <strong>联合训练</strong> 的方式进行 <strong>end-to-end</strong> 进行训练，并且速度要比 <strong>fast rcnn</strong> 快</p>
@@ -1206,63 +1198,64 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 </ul>
 <p>对于超过 $0.3$ 却低于 $0.7$ <strong>iou</strong> 值的 <strong>anchor</strong>不参与训练</p>
 <h6 id="-">损失函数</h6>
-$$L(\{p_i\},\{t_i\}) = \frac{1}{N_{cls}}\sum_i L_{cls}(p_i,p_i^*) + \lambda\frac{1}{N_{reg}}p^*\sum_i L_{reg}(t_i,t_i^*)$$
-
-$$L_{cls} = -[p_i^*log(p_i) + (1-p_i^*)log(1-p_i)]$$
-$$L_{reg} = \sum_i Smooth_{L_1}(t_i,t_i^*)$$
-$$t_i \in \{t_x,t_y,t_w,t_h\}$$
-$$lt_i^* \in \{t_x^*,t_y^*,t_w^*,t_h^*\}$$
+<p>$$L({p_i},{t_i}) = \frac{1}{N_{cls}}\sum_i L_{cls}(p_i,p_i^<em>) + \lambda\frac{1}{N_{reg}}p^</em>\sum_i L_{reg}(t_i,t_i^*)$$</p>
+<p>$$L_{cls} = -[p_i^<em>log(p_i) + (1-p_i^</em>)log(1-p_i)]$$
+$$L_{reg} = \sum_i Smooth_{L_1}(t_i,t_i^<em>)$$
+$$t_i \in {t_x,t_y,t_w,t_h}$$
+$$lt_i^</em> \in {t_x^<em>,t_y^</em>,t_w^<em>,t_h^</em>}$$
 $$t_x = (x - x_a) / w_a \:,\: t_y = (y - y_a) / h_a$$
 $$t_w = log(w/w_a) \:,\: t_h = log(h/h_a)$$
-$$t_x^* = (x^* - x_a) / w_a \:,\: t_y^* = (y^* - y_a) / h_a$$
-$$t_w^* = log(w^*/w_a) \:,\: t_h^* = log(h^*/h_a)$$
+$$t_x^<em> = (x^</em> - x_a) / w_a \:,\: t_y^<em> = (y^</em> - y_a) / h_a$$
+$$t_w^<em> = log(w^</em>/w_a) \:,\: t_h^<em> = log(h^</em>/h_a)$$
 $$
-  smooth_{L_i}(x) =  \left \{
-  \begin{aligned}
-  0.5x^2  ,\: \:\:\: \:\:if|x|<1\\
-  |x| - 0.5 , \: \:\:otherwise
-  \end{aligned}
-  \right.
-  $$</p>
-  $p_i$ 表示第$i$个anchor预测为目标的概率
-  $p_i^*$ 为正样本时为$1$，负样本时为$0$
-  $t_i$ 表示第$i$个anchor的边界框回归参数
-  $t_i^*$ 表示第$i$个anchor对应的真实 $Ground \:\: Truth \:\: Box$ 的回归参数
+smooth_{L_i}(x) =  \left {
+\begin{aligned}
+0.5x^2  ,\: \:\:\: \:\:if|x|&lt;1\
+|x| - 0.5 , \: \:\:otherwise
+\end{aligned}
+\right.
+$$</p>
+<p>$p_i$ 表示第$i$个anchor预测为目标的概率
+$p_i^<em>$ 为正样本时为$1$，负样本时为$0$
+$t_i$ 表示第$i$个anchor的边界框回归参数,$t_i$是通过预测得到的 通过上式还原回特征图的坐标和宽高，
+$t_i^</em>$ 表示第$i$个anchor对应的真实 $Ground \:\: Truth \:\: Box$ 的回归参数，$t_i^*$是通过GT在原特征图上的坐标和宽高，根据上式计算得到的，用来和$t_i$计算损失，回归边界框</p>
 <div id="swinod"></div>
 
 <h3 id="swin-transformer-object-detection">Swin Transformer Object Detection</h3>
 <p><strong>Swin Transformer Object Detection</strong> 是基于 <strong>MMDetection</strong> 搭建的这里提供了两种目标检测的方法（<strong>Mask RCNN / Cascade Mask RCNN</strong>），这里以 <strong>Mask RCNN</strong> 为例，整体结构分为四个部分：<strong>backbone、neck、rpn head、roi head</strong>。</p>
-<p>$$ 
-  Mask \: RCNN 
-  \left\{
-  \begin{aligned}
-  Backbone \\
-  Neck \\
-  RPN \: head \\
-  ROI \: head
-  \end{aligned}
-  \right.
-  $$</p>
+<p>$$
+Mask \: RCNN 
+\left{
+\begin{aligned}
+Backbone \
+Neck \
+RPN \: head \
+ROI \: head
+\end{aligned}
+\right.
+$$</p>
 <h4 id="backbone">BackBone</h4>
 <p>由四个 <strong>BasicLayer</strong> 组成，包含 <strong>blocks</strong> 和 <strong>patch merging</strong> 两个结构。<strong>blocks</strong> 中包含若干个基本 <strong>swin transformer</strong> 模块，<strong>patch merging</strong> 负责下采样，每经过一个 <strong>patch merging</strong> 特征图的宽高变为原来的一半，<strong>channel</strong> 变为原来的两倍。以输入图象 $（3，800，1216）$ 为例，首先经过<a href="#pp_le">patch partation &amp; linear embedding</a>变成$（96，200，304）$，依次输入4个 <strong>BasicLayer</strong> 。输出out依次为：$（1，96，200，304）$ $（1，192，100，152）$ $（1，384，50，76）$ $（1，768，25，38）$。将输出<strong>out</strong> 送进 <strong>FPN</strong> </p>
 <h4 id="neck">Neck</h4>
-<p>$$ Neck \left \{
-  \begin{aligned}
-  lateral \_ convs \\\\
-  fpn\_convs
-  \end{aligned}
-  \right.
-  $$</p>
+<p>$$
+Neck \left {
+\begin{aligned}
+lateral _ convs \\
+fpn_convs
+\end{aligned}
+\right.
+$$</p>
 <p><strong>Neck</strong> 为 <strong>FPN</strong> 结构，从 <strong>Backbone</strong> 的四个 <strong>Stage</strong> 每一层的输出形成一个金字塔结构，每个 <strong>stage</strong> 输出特征层的 <strong>channe</strong> l作为 <strong>FPN</strong> 的 <strong>input channel</strong>，<strong>FPN</strong>的<strong>output channel</strong>为$256$，输出特征层的数量为$5$。<strong>lateral_convs</strong>通过<strong>kernel size为1，stride为1的卷积</strong> 把四个 <strong>stage</strong>的<strong>channel</strong> $[96, 192, 384, 768]$，统一变成$256$，再通过<strong>fpn_convs</strong>用<strong>kernel size为3，stride为1，padding为1的卷积</strong> 对上述4个 <strong>channel</strong> 为$256$的特征图进行卷积，通过上层特征图通过双线性插值（<strong>F.interpolate</strong>）加到下一层特征图中，最后最上层特征图 $（25，38，256）$直接maxpool生成第五层特征图 $（13，19，256）$。这里共有五个特征层。</p>
 <h4 id="rpn-head">RPN Head</h4>
-<p>$$ RPN \: Head \left\{
-  \begin{aligned}
-  rpn\_conv \\
-  rpn\_cls \\
-  rpn\_reg
-  \end{aligned}
-  \right.
-  $$</p>
+<p>$$
+RPN \: Head \left{
+\begin{aligned}
+rpn_conv \
+rpn_cls \
+rpn_reg
+\end{aligned}
+\right.
+$$</p>
 <p>这里 <strong>RPN</strong> 结构用三个卷积，把5层特征图—&gt;分类和回归，<strong>rpn_conv</strong> 为 <strong>Conv2d($256, 256$, kernel_size=($3, 3$), stride=($1, 1$), padding=($1, 1$))</strong> 用来提取特征，<strong>rpn_cls</strong> 为 <strong>Conv2d($256, 3$, kernel_size=($1, 1$), stride=$(1, 1$))</strong> 用来分类，这里<strong>out_channel</strong> 为 $3$ 表示 $3$ 个<strong>anchor</strong> 尺度分别为 $（2:1，1:1，1:2）$，<strong>rpn_reg</strong> 为 <strong>Conv2d($256, 12$, kernel_size=($1, 1$), stride=($1, 1$))</strong> 用来对bbox回归，<strong>out_put channel</strong> 代表：($4$个坐标值*$3$ anchor）。</p>
 <p>具体运算细节为：根据 <strong>score</strong>(如$200，308，256$)分数得到每层前$1000$个目标，然后加一起，得到<strong>bbox</strong>：$（4741，5）$（因为第五层只有$13 <em>19 </em>3$，只有$741$个，不足$1000$个目标）。最后送入<strong>NMS</strong>得到$1426$个目标，只选$1000$ 个得到最后输出的Rois：$（1000，5）$</p>
 <h4 id="roi-head">ROI Head</h4>
@@ -1271,8 +1264,7 @@ $$
   \begin{aligned}
   \bigg[ \log_2 (\frac{S_{1000}}{56+ \epsilon})\bigg]_{floor}
 \end{aligned}
-$$
-</p>
+$$</p>
 <p><strong>$S_{1000}$</strong> 表示 $1000$ 个候选框的面积，$56+ \epsilon$ 是已经调到最好的尺度比例，$\epsilon $ 为 $1e-6$，这个公式用来判断每一个面积属于哪一个特征层。</p>
 <p>通过</p>
 <pre><code class="lang-python"># 循环5层特征图i：
@@ -1359,15 +1351,14 @@ det_bbox,det_label = multiclass_nms(bbox,score)
 </ul>
 <p>负样本：</p>
 <ul>
-<li>计算所有负样本的confidence loss并排序，confidence loss越大则会预测为正样本的概率越大(这里的confidece loss 是分类损失，即本应该是负样本但是他预测为其他类别的概率却比较高)</li>
+<li>计算所有负样本的confidence loss并排序，confidence loss越大则会预测为正样本的概率越大</li>
 <li>以正负样本$1:3$的比例去选取得分靠前的负样本进行训练</li>
 </ul>
 <h5 id="loss">Loss</h5>
 <p>$$L = \frac{1}{N}(L_{conf}(x,c) + \alpha L_{loc}(x,l,g)) $$</p>
-<p>
-  $$L_{conf}(x,c) = -\sum_{i\subseteqq Pos} ^N x_{ij}^p log(\hat{c}_i^p) - \sum_{i\subseteqq Pos} log(\hat{c}_i^0)
-  \: \: where \: \hat{c}_i^p = \frac{exp(c^p_i)}{\sum_p exp(c^p_i)}
-  $$</p>
+<p>$$L_{conf}(x,c) = -\sum_{i\subseteqq Pos} ^N x_{ij}^p log(\hat{c}<em>i^p) - \sum</em>{i\subseteqq Pos} log(\hat{c}_i^0)
+\: \: where \: \hat{c}_i^p = \frac{exp(c^p_i)}{\sum_p exp(c^p_i)}
+$$</p>
 <div align=center>
 
 <img src="./img/ssd_loss_1.png" alt="swin">
@@ -1529,8 +1520,7 @@ Yolov1的Loss即 x，y，w，h的bbox损失，正负样本的confidence损失，
 </div>
 
 <p>对于每个 anchor 预测 $4 + 1 + 80$，4表示4个坐标的偏移量，1表示confidence，80代表coco数据集的类别，所以对于一个$N\times N$的特征图，预测3个scale，共有$N\times N \times 3 (4 + 1 + 80)$( $N \in {13,26,52 }$)</p>
-<p>对于目标边界框的回归参数，$t_w,t_h,t_x,t_y$来说是基于grid的cell 的左上角来说的，而faster rcnn 、ssd都是基于anchor的，所以通过一个sigmoid函数把$t_x,t_y$的范围限制在$[0,1]$之间。如下：</p>
-
+<p>对于目标边界框的回归参数，$t_x,t_y$来说是基于grid的cell 的左上角来说的，而faster rcnn 、ssd都是基于anchor的，所以通过一个sigmoid函数把$t_x,t_y$的范围限制在$[0,1]$之间。如下：</p>
 <div align=center>
 
 <img src="./img/yolov3_predict.png" alt="swin">
@@ -1543,14 +1533,15 @@ $$ y = h_a t_y + y_a $$
 $$ w = w_a e^{t_w }$$
 $$ h = h_a e^{t_h} $$</p>
 <p><strong>yolo</strong> 中的坐标的是基于当前前 <strong>cell</strong> 的左上角的，且每一个 <strong>grid</strong>的范围都是$[0,1]$，所以如果不对$t_x,t_y$进行限制，并且再乘以一个系数的话会出现偏移出当前的<strong>cell</strong>的情况，这与<strong>yolo</strong>的如果一个目标落在一个<strong>cel</strong>l里那么这个<strong>cell</strong>就预测这个目标的初衷是违背的</p>
-
 <h5 id="-">采样</h5>
-<p>对于每一个gt只选取得分最大的anchor，如果由anchor不是最大但是超过了给定阈值那么则直接丢弃，对于既不是正样本也不是负样本的anchor ，它既没有类别损失也没有定位损失，只有confidence损失，对于yolov3 u版的采样问题，是使用template计算IOU得出的，对于模板与gt的iou大于某一个阈值那么就认为是正样本，所以正样本得到了扩充，如下</p>
+<p>对于每一个gt只选取得分最大的anchor，如果由anchor不是最大但是超过了给定阈值那么则直接丢弃，对于既不是正样本也不是负样本的anchor ，它既没有类别损失也没有定位损失，只有confidence损失，对于yolov3 u版的采样问题，是使用template计算IOU得出的，对于模板与gt的iou大于某一个阈值那么就认为是正样本，所以正样本得到了扩充，如下：</p>
 <div align=center>
 
 <img src="./img/yolov3_template.png" alt="swin">
 
 </div>
+
+
 
 <h5 id="loss">Loss</h5>
 <div align=center>
@@ -1845,7 +1836,7 @@ $$ -1\le DIou \le 1$$</p>
 <h5 id="sppf">SPPF</h5>
 <div align=center>
 
-<img src="./img/SPPF.png" alt="image">
+<img src="./img/sppf.png" alt="image">
 
 </div>
 
@@ -1866,7 +1857,7 @@ $$ -1\le DIou \le 1$$</p>
 <li>EMA(Exponential Moving Average)，可以理解为给训练的参数加了一个动量，让它更新过程更加平滑。</li>
 <li>Mixed precision，混合精度训练，能够减少显存的占用并且加快训练速度，前提是GPU硬件支持。</li>
 <li>Evolve hyper-parameters，超参数优化，没有炼丹经验的人勿碰，保持默认就好。</li>
-
+</ul>
 <p>基于yolov3的消除网格敏感度的改进，如果某些极端情况，例如gt的中心坐标就是grid cell的左上角的话，$t_x,t_y$的sigmoid应该是为0的，由于sigmoid的函数的特点值为0是，$t_x,t_y应该是取负无穷的，所以作者加了scale缩放因子来平衡sigmoid因子，如下：</p>
 <div align=center>
 
@@ -1880,16 +1871,14 @@ $$ -1\le DIou \le 1$$</p>
 <img src="./img/yolov4_template.png" alt="image">
 
 </div>
+
 <p>对于gt的中心点，在当前gridcell的左上角的时候，就往上左扩充一个grid cell，对于在右下角的情况就往右下扩充一个grid，以此类推</p>
-
-
 <div align=center>
 
 <img src="./img/yolov4_template_2.png" alt="image">
 
 </div>
 
-</ul>
 <h5 id="loss">Loss</h5>
 <div align=center>
 
@@ -2048,22 +2037,22 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 <h4 id="focal-loss">Focal Loss</h4>
 <p><strong><em>Focal Loss的目的：消除类别不平衡 + 挖掘难分样本</em></strong></p>
 <p>Focal Loss非常简单，就是在原有的交叉熵损失函数上增加了一个因子，让损失函数更加关注hard examples，以下是用于二值分类的交叉熵损失函数。其中 $y \in {\pm1}$ 为类别真实标签， $p \in [0,1]$ 是模型预测的 $y = 1$ 的概率。</p>
-<p>$$ CE(p, y ) = \left \{
-  \begin{aligned}
-  -log(p) , if \quad  y = 1\\
-  -log(1-p),otherwise
-  \end{aligned}
-  \right.
-  $$</p>
+<p>$$ CE(p, y ) = \left {
+\begin{aligned}
+-log(p) , if \quad  y = 1\
+-log(1-p),otherwise
+\end{aligned}
+\right.
+$$</p>
 <p>重新定义CE如下：</p>
-<p>$$ p_t = \left \{
-  \begin{aligned}
-  p , if \quad  y = 1\\
-  1-p,otherwise
-  \end{aligned}
-  \right.
-  $$</p>
-<p>$$CE(p,y) = CE(pt) = -log(p_t)$$</p>
+<p>$$ p_t = \left {
+\begin{aligned}
+p , if \quad  y = 1\
+1-p,otherwise
+\end{aligned}
+\right.
+$$
+$$CE(p,y) = CE(pt) = -log(p_t)$$</p>
 <p>对于这种类别不均衡问题常用的方法是引入一个权重因子 $\alpha$ ，对于类别1的使用权重 $\alpha$ ，对于类别-1使用权重 $1-\alpha$ ，公式如下所示。但采用这种加权方式可以平衡正负样本的重要性，但无法区分容易分类的样本与难分类的样本。</p>
 <p>$$CE(p_t) = -\alpha_t log(p_t)$$</p>
 <p>因此论文中提出在交叉熵前增加一个调节因子 $(1-p_t)^\gamma$ ，其中 $ \gamma $ 为focusing parameter，且 $\gamma \ge 0$ ，其公式变为如下，当 $ \gamma $ 取不同数值时loss曲线如图1所示。通过途中可以看到，当 $ \gamma $ 越来越大时，loss函数在容易分类的部分其loss几乎为零，而 $ p_t $ 较小的部分（hard examples部分）loss值仍然较大，这样就可以保证在类别不平衡较大时，累加样本loss，可以让hard examples贡献更多的loss，从而可以在训练时给与hard examples部分更多的优化。</p>
@@ -2110,12 +2099,11 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 <h2 id="rnn">RNN</h2>
 <div align=center>
 
-<img src="./img/RNN.png" alt="swin">
+<img src="./img/rnn.png" alt="swin">
 
 </div>
 
 <p><img src="./img/rnn_func.png" alt="swin"></p>
-
 <h2 id="lstm">LSTM</h2>
 <div align=center>
 
@@ -2237,24 +2225,24 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 
 </div>
 
-<p>函数</p>
-<p>$$
-  f(x) =  \left \{
-  \begin{aligned}
-  0  ,x < 0\\
-  x  ,x \ge 0
-  \end{aligned}
-  \right.
-  $$</p>
-<p>导数</p>
-<p>$$
-  f'(x) =  \left \{
-  \begin{aligned}
-  0  ,x < 0\\
-  1  ,x \ge 0
-  \end{aligned}
-  \right.
-  $$</p>
+<p>函数
+$$
+f(x) =  \left {
+\begin{aligned}
+0  ,x &lt; 0\
+x  ,x \ge 0
+\end{aligned}
+\right.
+$$
+导数
+$$
+f&#39;(x) =  \left {
+\begin{aligned}
+0  ,x &lt; 0\
+1  ,x \ge 0
+\end{aligned}
+\right.
+$$</p>
 <h4 id="-">优点</h4>
 <ul>
 <li>解决了gradient vanishing问题 (在正区间)</li>
@@ -2280,16 +2268,16 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 
 </div>
 
-<p>函数</p>
-<p>$$
-  f(x) =  \left \{
-  \begin{aligned}
-  0.01x  ,x < 0\\
-  x  ,x \ge 0
-  \end{aligned}
-  \right.
-  $$</p>
-<p>导数</p>
+<p>函数
+$$
+f(x) =  \left {
+\begin{aligned}
+0.01x  ,x &lt; 0\
+x  ,x \ge 0
+\end{aligned}
+\right.
+$$
+导数</p>
 <div id="elu"></div>
 
 <h3 id="elu">ELU</h3>
@@ -2305,24 +2293,24 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 
 </div>
 
-<p>函数</p>
-<p>$$
-  ELU =  \left \{
-  \begin{aligned}
-  \alpha (e^x - 1) ,x < 0\\
-  x  ,x \ge 0
-  \end{aligned}
-  \right.
-  $$</p>
-<p>导数</p>
-<p>$$
-  ELU'(x) =  \left \{
-  \begin{aligned}
-  ELU(x) + \alpha ,x < 0\\
-  1  ,x \ge 0
-  \end{aligned}
-  \right.
-  $$</p>
+<p>函数
+$$
+ELU =  \left {
+\begin{aligned}
+\alpha (e^x - 1) ,x &lt; 0\
+x  ,x \ge 0
+\end{aligned}
+\right.
+$$
+导数
+$$
+ELU&#39;(x) =  \left {
+\begin{aligned}
+ELU(x) + \alpha ,x &lt; 0\
+1  ,x \ge 0
+\end{aligned}
+\right.
+$$</p>
 <div id="mish"></div>
 
 <h3 id="mish">Mish</h3>
@@ -2476,32 +2464,9 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 <h2 id="-">损失函数</h2>
 <h3 id="softmax">softmax</h3>
 <p>$$softmax = \frac{e^{x_i}}{\sum_i e ^{x_i}}$$</p>
-
-<pre><code class="lang-python"># softmax
-  def softmax(x: Tensor) -> Tensor:
-    row_max = torch.max(x, dim=1, keepdim=True).values
-    x -= row_max
-    exp_x = torch.exp(x)
-    exp_sum = torch.sum(exp_x, dim=1, keepdim=True)
-    return exp_x / exp_sum
-
-</code></pre>
-
 <h3 id="bceloss">BCELoss</h3>
 <p>$$ BCE = - \frac{1}{N} \sum_i [y_i \cdot log(p_i) + (1 - y_i) log(1 - p_i)]$$</p>
 <h3 id="celoss">CELoss</h3>
-
-<pre><code class="lang-python"># cel：
-  def nllloss(x: Tensor, target: Tensor) -> Tensor:
-    return torch.mean(torch.tensor([-_x[t] for _x, t in zip(x, target)]))
-  
-  def CrossEntropyLoss(x: Tensor, target: Tensor) -> Tensor:
-    softmax_out = softmax(x)
-    log_out = torch.log(softmax_out)
-    nllloss_loss = nllloss(log_out, target)
-    return nllloss_loss
-</code></pre>
-
 <p>$$ CE = - \frac{1}{N} \sum_i \sum_{c=1}^M [y_{ic} \cdot log(p_{ic})]$$</p>
 <p>反向传播包括softmax：</p>
 <div align=center>
@@ -2559,7 +2524,7 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 <h3 id="nms">NMS</h3>
 <div align=center>
 
-<img src="./img/NMS.png" alt="swin">
+<img src="./img/nms.png" alt="swin">
 
 </div>
 
@@ -2611,25 +2576,25 @@ One Stage：例如SSD，YOLO算法。此类算法摒弃了提取proposal的过�
 <h3 id="soft-nms">Soft NMS</h3>
 <h4 id="-">原理</h4>
 <p>对于 <strong>Traditional NMS</strong> 有：
-  $$ 
-  s_i =  \left \{
-  \begin{aligned}
-  0  ,IOU(M,B_i) \ge thresh\\
-  s_i  ,IOU(M,B_i) \ge thresh
-  \end{aligned}
-  \right.
-  $$</p>
-<p>显然，对于 $IoU≥NMS$ 阈值的相邻框，<strong>Traditional NMS</strong> 的做法是将其得分 <strong>暴力置0</strong>。这对于有遮挡的案例较不友好。因此 <strong>Soft-NMS</strong> 的做法是采取 <strong>得分惩罚机制</strong>，使用一个与IoU正相关的惩罚函数对得分 s 进行惩罚，时期得分降低，并不是直接丢弃。</p>
-<p>线性惩罚：</p>
-<p>$$ 
-  s_i =  \left \{
-  \begin{aligned}
-  s_i(1-IOU(M,B_i))  , \: IOU(M,B_i) \ge thresh\\
-  s_i  ,\: IOU(M,B_i) \ge thresh
-  \end{aligned}
-  \right.
-  $$</p>
-<p>但是，上式并不是一个连续的函数，<strong>不光滑</strong>，当一个边框与M的重叠IoU超过阈值Nt时，其得分会发生跳变，这种跳变会对检测结果产生较大的波动。
+$$
+s_i =  \left {
+\begin{aligned}
+0  ,IOU(M,B_i) \ge thresh\
+s_i  ,IOU(M,B_i) \ge thresh
+\end{aligned}
+\right.
+$$
+显然，对于 $IoU≥NMS$ 阈值的相邻框，<strong>Traditional NMS</strong> 的做法是将其得分 <strong>暴力置0</strong>。这对于有遮挡的案例较不友好。因此 <strong>Soft-NMS</strong> 的做法是采取 <strong>得分惩罚机制</strong>，使用一个与IoU正相关的惩罚函数对得分 s 进行惩罚，时期得分降低，并不是直接丢弃。</p>
+<p>线性惩罚：
+$$
+s_i =  \left {
+\begin{aligned}
+s_i(1-IOU(M,B_i))  , \: IOU(M,B_i) \ge thresh\
+s_i  ,\: IOU(M,B_i) \ge thresh
+\end{aligned}
+\right.
+$$
+但是，上式并不是一个连续的函数，<strong>不光滑</strong>，当一个边框与M的重叠IoU超过阈值Nt时，其得分会发生跳变，这种跳变会对检测结果产生较大的波动。
 因此还需要寻找一个更为稳定、连续的得分重置函数，最终Soft NMS给出了如下式所示的重置函数。高斯Soft NMS计算公式：
 $$s_i = s_i\cdot e^{-\frac{IOU(M,B_i)^2}{\sigma}}$$</p>
 <h4 id="-">缺点</h4>
@@ -2643,14 +2608,14 @@ $$s_i = s_i\cdot e^{-\frac{IOU(M,B_i)^2}{\sigma}}$$</p>
 
 <h3 id="diou-nms">DIOU NMS</h3>
 <h4 id="-">原理</h4>
-<p>$$ 
-  s_i =  \left \{
-  \begin{aligned}
-  0  ,DIOU(M,B_i) \ge thresh\\
-  s_i  ,DIOU(M,B_i) \ge thresh
-  \end{aligned}
-  \right.
-  $$</p>
+<p>$$
+s_i =  \left {
+\begin{aligned}
+0  ,DIOU(M,B_i) \ge thresh\
+s_i  ,DIOU(M,B_i) \ge thresh
+\end{aligned}
+\right.
+$$</p>
 <p>把 NMS 中的 <strong>IOU 换成 DIOU</strong>，<strong>DIOU</strong> 考虑了中心坐标的偏移，DIOU：
 $$DIOU = IOU - \frac{d^2}{c^2}$$</p>
 <p>实际操作中作者还加入了$\beta$ ，用以控制$\frac{d^2}{c^2}$的惩罚程度</p>
@@ -2702,31 +2667,6 @@ $$W_{t+1} = W_t - \frac{\alpha}{\sqrt{\hat{v_t} + \epsilon}} \cdot \hat{m_t}$$</
 <hr>
 <h1 id="-">机器学习</h1>
 <h2 id="-">朴素贝叶斯</h2>
-
-<div align=center>
-
-<img src="./img/naive_bayes.png" alt="swin">
-
-</div>
-
-<div align=center>
-
-<img src="./img/naive_bayes_1.png" alt="swin">
-
-</div>
-
-<div align=center>
-
-<img src="./img/naive_bayes__.png" alt="swin">
-  
-</div>
-
-<div align=center>
-
-<img src="./img/loglikelyhood.png" alt="swin">
-  
-</div>
-
 <h2 id="-">线性分类</h2>
 <h2 id="-">逻辑回归</h2>
 <h2 id="-">牛顿法</h2>
@@ -2750,26 +2690,7 @@ $$W_{t+1} = W_t - \frac{\alpha}{\sqrt{\hat{v_t} + \epsilon}} \cdot \hat{m_t}$$</
 <script type="text/javascript" src="toc/js/jquery.ztree.all-3.5.min.js"></script>
 <script type="text/javascript" src="toc/js/ztree_toc.js"></script>
 <script type="text/javascript" src="toc_conf.js"></script>
-<script src="https://cdn.bootcss.com/mathjax/2.7.2/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    showProcessingMessages: false, //关闭js加载过程信息
-    messageStyle: "none", //不显示信息
-    extensions: ["tex2jax.js"],
-    jax: ["input/TeX", "output/HTML-CSS"],
-    tex2jax: {
-        inlineMath: [ ['$','$'], ["\\(","\\)"] ], //行内公式选择符
-        displayMath: [ ['$$','$$'], ["\\[","\\]"] ], //段内公式选择符
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code','a'], //避开某些标签
-        ignoreClass:"comment-content" //避开含该Class的标签
-    },
-    "HTML-CSS": {
-        availableFonts: ["STIX","TeX"], //可选字体
-        showMathMenu: false //关闭右击菜单显示
-    }
-});
-MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
-</script>
+
 <SCRIPT type="text/javascript" >
 <!--
 $(document).ready(function(){
