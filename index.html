@@ -2698,48 +2698,436 @@ $$W_{t+1} = W_t - \frac{\alpha}{\sqrt{\hat{v_t} + \epsilon}} \cdot \hat{m_t}$$</
 <div id="attn"></div>
 
 <h2 id="attention">Attention</h2>
-<p>Attention 和 fc 的 区别</p>
+<p><a href="https://www.zhihu.com/question/320174043">Attention 和 fc 的 区别</a></p>
 <hr>
 <h1 id="-">机器学习</h1>
 <h2 id="-">朴素贝叶斯</h2>
-
-<div align=center>
-
-<img src="./img/naive_bayes.png" alt="swin">
-
-</div>
-
-<div align=center>
-
-<img src="./img/naive_bayes_1.png" alt="swin">
-
-</div>
-
-<div align=center>
-
-<img src="./img/naive_bayes__.png" alt="swin">
-  
-</div>
-
-<div align=center>
-
-<img src="./img/loglikelyhood.png" alt="swin">
-  
-</div>
-
-<h2 id="-">线性分类</h2>
+<p><a href="https://www.cnblogs.com/lyq2021/p/14253771.html">朴素贝叶斯</a></p>
 <h2 id="-">逻辑回归</h2>
-<h2 id="-">牛顿法</h2>
-<h2 id="-">拟牛顿法</h2>
+<p><a href="https://www.cnblogs.com/lyq2021/p/14253818.html">逻辑回归</a></p>
+<h2 id="-">牛顿法/拟牛顿法</h2>
+<p><a href="https://zhuanlan.zhihu.com/p/46536960">牛顿法/拟牛顿法</a></p>
+<h2 id="-">感知机</h2>
+<p><a href="https://www.cnblogs.com/lyq2021/p/14253768.html">感知机</a></p>
 <h2 id="svm">SVM</h2>
+<p><a href="https://www.cnblogs.com/lyq2021/p/14253858.html">SVM</a></p>
 <h2 id="pca">PCA</h2>
+<p><a href="https://zhuanlan.zhihu.com/p/77151308">PCA</a></p>
 <h2 id="-">决策树</h2>
+<p><a href="https://zhuanlan.zhihu.com/p/85731206">决策树</a></p>
 <h2 id="-">随机森林</h2>
+<p><a href="https://zhuanlan.zhihu.com/p/86263786">随机森林</a></p>
+<h2 id="adaboost">AdaBoost</h2>
+<p><a href="https://www.cnblogs.com/lyq2021/p/14253860.html">AdaBoost</a></p>
 <h2 id="xgboost">XGBoost</h2>
+<p><a href="https://zhuanlan.zhihu.com/p/87885678">XGBoost</a></p>
 <h2 id="kmeans">Kmeans</h2>
+<p><a href="https://zhuanlan.zhihu.com/p/78798251">Kmeans</a></p>
 <h2 id="knn">KNN</h2>
+<p id="knn"><a href="https://www.cnblogs.com/lyq2021/p/14253756.html">KNN</a></p>
 <hr>
 <h1 id="-">图像处理知识</h1>
+<h2 id="fundamental">Fundamental</h2>
+<h3 id="algebraic-processing">Algebraic Processing</h3>
+<h4 id="intensity-adjustment">Intensity Adjustment</h4>
+<div align=center>
+
+<img src="./img/intensity.png" alt="flip">
+
+</div>
+
+<div align=center>
+
+<img src="./img/Intensity_Adjustment.png" alt="flip">
+
+</div>
+
+<h4 id="contrast-adjustment">Contrast Adjustment</h4>
+<div align=center>
+
+<img src="./img/contrast.png" alt="flip">
+
+</div>
+
+<h4 id="highlighting-specific-gray-level">Highlighting Specific Gray-Level</h4>
+<div align=center>
+
+<img src="./img/highlighting_range.png" alt="flip">
+
+</div>
+
+<div align=center>
+
+<img src="./img/highlighting.png" alt="flip">
+
+</div>
+
+<h4 id="bit-plane-slicing">Bit-Plane Slicing</h4>
+<div align=center>
+
+<img src="./img/bit_plane.png" alt="flip">
+
+</div>
+
+
+<h4 id="xor">XOR</h4>
+<div align=center>
+
+<img src="./img/XOR.png" alt="flip">
+
+</div>
+
+
+<h4 id="or">OR</h4>
+<div align=center>
+
+<img src="./img/or.png" alt="flip">
+
+</div>
+
+
+<h4 id="and">AND</h4>
+<div align=center>
+
+<img src="./img/and.png" alt="flip">
+
+</div>
+
+<h3 id="geometric-processing">Geometric Processing</h3>
+<h4 id="horizontal-vertical-flip">Horizontal/Vertical Flip</h4>
+<div align=center>
+
+<img src="./img/flip.png" alt="flip">
+
+</div>
+
+<pre><code class="lang-c++">void vflip(const void *in, int width, int height, int istep,  int pix_size, void *out, int ostep)
+{
+       out=(char*)out+(height-1)*ostep;
+       for(int yi=0; yi&lt;height; ++yi, in=(char*)in+istep, out=(char*)out-ostep)
+       {
+            memcpy(out, in, width*pix_size);
+        }
+}
+
+void hflip(const void *in, int width, int height, int istep,  int pix_size, void *out, int ostep)
+{
+       char * _in=(char*)in;
+       char *_out=(char*)out+(width-1)*pix_size;
+
+       for(int yi=0; yi&lt;height; ++yi, _in+=istep, _out+=ostep)
+       {
+            char *in_x=_in, 
+            char *out_x=_out;
+             for(int xi=0; xi&lt;width; ++xi, in_x+=px_size, out_x-=px_size)
+                  memcpy(out_x, in_x, px_size) ;
+        }
+}
+
+</code></pre>
+<h4 id="resize">Resize</h4>
+<div align=center>
+
+<img src="./img/resize.png" alt="flip">
+
+</div>
+
+<h5 id="-">放大</h5>
+<h6 id="nearest-neighbor">Nearest Neighbor</h6>
+<div align=center>
+
+<img src="./img/nn.png" alt="flip">
+
+</div>
+
+<h6 id="bilinear-interpolation">Bilinear Interpolation</h6>
+<div align=center>
+
+<img src="./img/bi.png" alt="flip">
+
+</div>
+
+<pre><code class="lang-c++">//双线性差值
+int InterpBilinear(const QImage &amp;image,double x,double y)
+{
+    int width = image.width();
+    int height = image.height();
+
+    //四个临近点的坐标 (x1,y1)、(x1,y2),(x2,y1)，(x2,y2)
+    int x1,x2;
+    int y1,y2;
+
+    //两个差值的中值
+    double f12,f34;
+    double    epsilon = 0.0001;
+
+    //四个临近像素坐标x像素值
+    double f1,f2,f3,f4;
+
+    //计算四个临近坐标
+    x1 = (int)x;
+    x2 = x1 + 1;
+    y1 = (int)y;
+    y2 = y1+1;
+
+    //不在图片的范围内
+    if((x &lt; 0) || (x &gt; width - 1) || (y &lt; 0) || (y &gt; height - 1))
+    {
+        return -1;
+    }else{
+        if(fabs(x - width+1)&lt;=epsilon) //如果计算点在右测边缘
+        {
+            //如果差值点在图像的最右下角
+            if(fabs(y - height+1)&lt;=epsilon)
+            {
+                f1 = qGray(image.pixel(x1,y1));
+                return f1;
+            }else {
+                f1 = qGray(image.pixel(x1,y1));
+                f3 = qGray(image.pixel(x1,y2));
+
+                //图像右方的插值
+                return ((int) (f1 + (y-y1)*(f3-f1)));
+            }
+        }
+        //如果插入点在图像的下方
+        else if(fabs(y - height+1)&lt;=epsilon){
+           f1 = qGray(image.pixel(x1,y1));
+           f2 = qGray(image.pixel(x2,y1));
+
+           //图像下方的插值
+           return ((int) (f1 + (x-x1)*(f2-f1)));
+        }
+        else {
+            //得计算四个临近点像素值
+            f1 = qGray(image.pixel(x1,y1));
+            f2 = qGray(image.pixel(x2,y1));
+            f3 = qGray(image.pixel(x1,y2));
+            f4 = qGray(image.pixel(x2,y2));
+
+            //第一次插值
+            f12 = f1 + (x-x1)*(f2-f1); //f(x,0)
+
+            //第二次插值
+            f34 = f3 + (x-x1)*(f4-f3); //f(x,1)
+
+            //最终插值
+            return ((int) (f12 + (y-y1)*(f34-f12)));
+        }
+    }
+
+}
+
+</code></pre>
+<h6 id="bicubic-interpolation">Bicubic Interpolation</h6>
+<h4 id="rotation">Rotation</h4>
+<div align=center>
+
+<img src="./img/rotation.png" alt="flip">
+
+</div>
+
+<div align=center>
+
+<img src="./img/transformation1.png" alt="flip">
+
+</div>
+
+<div align=center>
+
+<img src="./img/transformation2.png" alt="flip">
+
+</div>
+
+<div align=center>
+
+<img src="./img/transformation3.png" alt="flip">
+
+</div>
+
+<div align=center>
+
+<img src="./img/multi_transformation.png" alt="flip">
+
+</div>
+
+<h4 id="affine">Affine</h4>
+<div align=center>
+
+<img src="./img/affine.png" alt="flip">
+
+</div>
+<div align=center>
+
+<img src="./img/affine2.png" alt="flip">
+
+</div>
+
+<h4 id="perspective">Perspective</h4>
+<div align=center>
+
+<img src="./img/perspective.png" alt="flip">
+
+</div>
+
+<h2 id="spatial-filtering">Spatial Filtering</h2>
+<h3 id="linear">Linear</h3>
+<h4 id="smoothing">Smoothing</h4>
+<div align=center>
+
+<img src="./img/low_pass.png" alt="flip">
+
+</div>
+
+<div align=center>
+
+<img src="./img/gaosi.png" alt="flip">
+
+</div>
+
+<h4 id="sharpening">Sharpening</h4>
+<h5 id="basic-high-pass">Basic High-Pass</h5>
+<div align=center>
+
+<img src="./img/basic_high.png" alt="flip">
+
+</div>
+
+<h5 id="derivative-filters">Derivative Filters</h5>
+<h6 id="first-derivatives-the-gradient">First Derivatives: The Gradient</h6>
+<p>Roberts Operators</p>
+<div align=center>
+
+<img src="./img/roberts.png" alt="flip">
+
+</div>
+
+
+<p>Prewitt Operators</p>
+<div align=center>
+
+<img src="./img/prewitt.png" alt="flip">
+
+</div>
+
+
+<p>Sobel Operators</p>
+<div align=center>
+
+<img src="./img/sobel.png" alt="flip">
+
+</div>
+
+
+<h6 id="second-derivatives-the-laplacian">Second Derivatives: The Laplacian</h6>
+<div align=center>
+
+<img src="./img/laplacian.png" alt="flip">
+
+</div>
+<div align=center>
+
+<img src="./img/laplacian_filter.png" alt="flip">
+
+</div>
+
+<h6 id="high-boost-filter-">High-Boost Filter(高频补偿滤波器)</h6>
+<div align=center>
+
+<img src="./img/high_boost.png" alt="flip">
+
+</div>
+<div align=center>
+
+<img src="./img/high_boost_filter.png" alt="flip">
+
+</div>
+
+<h3 id="nonlinear">Nonlinear</h3>
+<h4 id="median-filter">Median  filter</h4>
+<div align=center>
+
+<img src="./img/median.png" alt="flip">
+
+</div>
+
+<div align=center>
+
+<img src="./img/salt_pepper.png" alt="flip">
+
+</div>
+
+
+<h4 id="max-filter">Max  filter</h4>
+<div align=center>
+
+<img src="./img/max.png" alt="flip">
+
+</div>
+
+<h4 id="min-filter">Min  filter</h4>
+<div align=center>
+
+<img src="./img/min.png" alt="flip">
+
+</div>
+
+<h4 id="bilateral-filter">Bilateral Filter</h4>
+<div align=center>
+
+<img src="./img/bf.png" alt="flip">
+
+</div>
+
+<h2 id="structures">Structures</h2>
+<h3 id="-">膨胀和腐蚀</h3>
+<div align=center>
+
+<img src="./img/pf.png" alt="flip">
+
+</div>
+<div align=center>
+
+<img src="./img/fushi.png" alt="flip">
+
+</div>
+
+<h3 id="-">开运算闭运算</h3>
+<div align=center>
+
+<img src="./img/kai.png" alt="flip">
+
+</div>
+<div align=center>
+
+<img src="./img/bi_op.png" alt="flip">
+
+</div>
+
+<h2 id="machting">Machting</h2>
+<h3 id="corner-detection">Corner Detection</h3>
+<div align=center>
+
+<img src="./img/corner.png" alt="flip">
+
+</div>
+<div align=center>
+
+<img src="./img/harris.png" alt="flip">
+
+</div>
+
+<h3 id="blob-detection">Blob Detection</h3>
+<div align=center>
+
+<img src="./img/hassian_detector.png" alt="flip">
+
+</div>
+
+<h3 id="hog">Hog</h3>
+<p><a href="https://blog.csdn.net/sinat_34474705/article/details/80219617">Hog</a></p>
+<h3 id="sift">SIFT</h3>
+<p><a href="https://www.itheima.com/news/20210604/113227.html">SIFT</a></p>
 
           	</article>
         </div>

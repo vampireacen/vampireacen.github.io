@@ -2950,21 +2950,479 @@ $m_t$ 为一阶动量，$v_t$ 为二阶动量，$\beta_1（0.9）$,$\beta_2（0.
 
 ## Attention
 
-Attention 和 fc 的 区别
+[Attention 和 fc 的 区别](https://www.zhihu.com/question/320174043)
 
 ---
 # 机器学习
 ## 朴素贝叶斯
-## 线性分类
+[朴素贝叶斯](https://www.cnblogs.com/lyq2021/p/14253771.html)
 ## 逻辑回归
-## 牛顿法
-## 拟牛顿法
+[逻辑回归](https://www.cnblogs.com/lyq2021/p/14253818.html)
+## 牛顿法/拟牛顿法
+[牛顿法/拟牛顿法](https://zhuanlan.zhihu.com/p/46536960)
+## 感知机
+[感知机](https://www.cnblogs.com/lyq2021/p/14253768.html)
 ## SVM
+[SVM](https://www.cnblogs.com/lyq2021/p/14253858.html)
 ## PCA
+[PCA](https://zhuanlan.zhihu.com/p/77151308)
 ## 决策树
+[决策树](https://zhuanlan.zhihu.com/p/85731206)
 ## 随机森林
+[随机森林](https://zhuanlan.zhihu.com/p/86263786)
+## AdaBoost
+[AdaBoost](https://www.cnblogs.com/lyq2021/p/14253860.html)
 ## XGBoost
+[XGBoost](https://zhuanlan.zhihu.com/p/87885678)
 ## Kmeans
+[Kmeans](https://zhuanlan.zhihu.com/p/78798251)
 ## KNN
+
+[KNN](https://www.cnblogs.com/lyq2021/p/14253756.html)
 ---
 # 图像处理知识
+## Fundamental
+
+### Algebraic Processing
+
+#### Intensity Adjustment
+
+<div align=center>
+
+![flip](./img/intensity.png)
+
+</div>
+
+<div align=center>
+
+![flip](./img/Intensity_Adjustment.png)
+
+</div>
+
+#### Contrast Adjustment
+
+<div align=center>
+
+![flip](./img/contrast.png)
+
+</div>
+
+#### Highlighting Specific Gray-Level
+
+<div align=center>
+
+![flip](./img/highlighting_range.png)
+
+</div>
+
+<div align=center>
+
+![flip](./img/highlighting.png)
+
+</div>
+
+#### Bit-Plane Slicing
+
+<div align=center>
+
+![flip](./img/bit_plane.png)
+
+</div>
+
+
+#### XOR
+
+<div align=center>
+
+![flip](./img/XOR.png)
+
+</div>
+
+
+#### OR
+
+<div align=center>
+
+![flip](./img/or.png)
+
+</div>
+
+
+#### AND
+
+<div align=center>
+
+![flip](./img/and.png)
+
+</div>
+
+### Geometric Processing
+
+#### Horizontal/Vertical Flip
+
+<div align=center>
+
+![flip](./img/flip.png)
+
+</div>
+
+```c++
+void vflip(const void *in, int width, int height, int istep,  int pix_size, void *out, int ostep)
+{
+       out=(char*)out+(height-1)*ostep;
+       for(int yi=0; yi<height; ++yi, in=(char*)in+istep, out=(char*)out-ostep)
+       {
+            memcpy(out, in, width*pix_size);
+        }
+}
+
+void hflip(const void *in, int width, int height, int istep,  int pix_size, void *out, int ostep)
+{
+       char * _in=(char*)in;
+       char *_out=(char*)out+(width-1)*pix_size;
+      
+       for(int yi=0; yi<height; ++yi, _in+=istep, _out+=ostep)
+       {
+            char *in_x=_in, 
+            char *out_x=_out;
+             for(int xi=0; xi<width; ++xi, in_x+=px_size, out_x-=px_size)
+                  memcpy(out_x, in_x, px_size) ;
+        }
+}
+
+```
+
+#### Resize
+
+<div align=center>
+
+![flip](./img/resize.png)
+
+</div>
+
+##### 放大
+
+###### Nearest Neighbor
+
+<div align=center>
+
+![flip](./img/nn.png)
+
+</div>
+
+###### Bilinear Interpolation
+
+<div align=center>
+
+![flip](./img/bi.png)
+
+</div>
+
+```c++
+//双线性差值
+int InterpBilinear(const QImage &image,double x,double y)
+{
+    int width = image.width();
+    int height = image.height();
+
+    //四个临近点的坐标 (x1,y1)、(x1,y2),(x2,y1)，(x2,y2)
+    int x1,x2;
+    int y1,y2;
+
+    //两个差值的中值
+    double f12,f34;
+    double	epsilon = 0.0001;
+
+    //四个临近像素坐标x像素值
+    double f1,f2,f3,f4;
+
+    //计算四个临近坐标
+    x1 = (int)x;
+    x2 = x1 + 1;
+    y1 = (int)y;
+    y2 = y1+1;
+
+    //不在图片的范围内
+    if((x < 0) || (x > width - 1) || (y < 0) || (y > height - 1))
+    {
+        return -1;
+    }else{
+        if(fabs(x - width+1)<=epsilon) //如果计算点在右测边缘
+        {
+            //如果差值点在图像的最右下角
+            if(fabs(y - height+1)<=epsilon)
+            {
+                f1 = qGray(image.pixel(x1,y1));
+                return f1;
+            }else {
+                f1 = qGray(image.pixel(x1,y1));
+                f3 = qGray(image.pixel(x1,y2));
+
+                //图像右方的插值
+                return ((int) (f1 + (y-y1)*(f3-f1)));
+            }
+        }
+        //如果插入点在图像的下方
+        else if(fabs(y - height+1)<=epsilon){
+           f1 = qGray(image.pixel(x1,y1));
+           f2 = qGray(image.pixel(x2,y1));
+
+           //图像下方的插值
+           return ((int) (f1 + (x-x1)*(f2-f1)));
+        }
+        else {
+            //得计算四个临近点像素值
+            f1 = qGray(image.pixel(x1,y1));
+            f2 = qGray(image.pixel(x2,y1));
+            f3 = qGray(image.pixel(x1,y2));
+            f4 = qGray(image.pixel(x2,y2));
+
+            //第一次插值
+            f12 = f1 + (x-x1)*(f2-f1); //f(x,0)
+
+            //第二次插值
+            f34 = f3 + (x-x1)*(f4-f3); //f(x,1)
+
+            //最终插值
+            return ((int) (f12 + (y-y1)*(f34-f12)));
+        }
+    }
+
+}
+
+```
+###### Bicubic Interpolation
+
+#### Rotation
+
+<div align=center>
+
+![flip](./img/rotation.png)
+
+</div>
+
+<div align=center>
+
+![flip](./img/transformation1.png)
+
+</div>
+
+<div align=center>
+
+![flip](./img/transformation2.png)
+
+</div>
+
+<div align=center>
+
+![flip](./img/transformation3.png)
+
+</div>
+
+<div align=center>
+
+![flip](./img/multi_transformation.png)
+
+</div>
+
+#### Affine
+
+<div align=center>
+
+![flip](./img/affine.png)
+
+</div>
+<div align=center>
+
+![flip](./img/affine2.png)
+
+</div>
+
+#### Perspective
+
+<div align=center>
+
+![flip](./img/perspective.png)
+
+</div>
+
+## Spatial Filtering
+### Linear
+#### Smoothing
+
+<div align=center>
+
+![flip](./img/low_pass.png)
+
+</div>
+
+<div align=center>
+
+![flip](./img/gaosi.png)
+
+</div>
+
+#### Sharpening
+##### Basic High-Pass
+
+<div align=center>
+
+![flip](./img/basic_high.png)
+
+</div>
+
+##### Derivative Filters
+
+###### First Derivatives: The Gradient
+
+Roberts Operators
+
+<div align=center>
+
+![flip](./img/roberts.png)
+
+</div>
+
+
+Prewitt Operators
+
+<div align=center>
+
+![flip](./img/prewitt.png)
+
+</div>
+
+
+Sobel Operators
+
+<div align=center>
+
+![flip](./img/sobel.png)
+
+</div>
+
+
+###### Second Derivatives: The Laplacian
+
+<div align=center>
+
+![flip](./img/laplacian.png)
+
+</div>
+<div align=center>
+
+![flip](./img/laplacian_filter.png)
+
+</div>
+
+###### High-Boost Filter(高频补偿滤波器)
+
+<div align=center>
+
+![flip](./img/high_boost.png)
+
+</div>
+<div align=center>
+
+![flip](./img/high_boost_filter.png)
+
+</div>
+
+### Nonlinear
+#### Median  filter
+
+<div align=center>
+
+![flip](./img/median.png)
+
+</div>
+
+<div align=center>
+
+![flip](./img/salt_pepper.png)
+
+</div>
+
+
+#### Max  filter
+
+<div align=center>
+
+![flip](./img/max.png)
+
+</div>
+
+#### Min  filter
+
+<div align=center>
+
+![flip](./img/min.png)
+
+</div>
+
+#### Bilateral Filter 
+
+<div align=center>
+
+![flip](./img/bf.png)
+
+</div>
+
+## Structures
+
+### 膨胀和腐蚀
+
+<div align=center>
+
+![flip](./img/pf.png)
+
+</div>
+<div align=center>
+
+![flip](./img/fushi.png)
+
+</div>
+
+### 开运算闭运算
+
+<div align=center>
+
+![flip](./img/kai.png)
+
+</div>
+<div align=center>
+
+![flip](./img/bi_op.png)
+
+</div>
+
+## Machting
+
+### Corner Detection
+
+<div align=center>
+
+![flip](./img/corner.png)
+
+</div>
+<div align=center>
+
+![flip](./img/harris.png)
+
+</div>
+
+### Blob Detection
+
+<div align=center>
+
+![flip](./img/hassian_detector.png)
+
+</div>
+
+### Hog
+
+[Hog](https://blog.csdn.net/sinat_34474705/article/details/80219617)
+
+### SIFT
+
+[SIFT](https://www.itheima.com/news/20210604/113227.html)
