@@ -3384,7 +3384,7 @@ Sobel Operators
 
 <div align=center>
 
-![flip](./img/pf.png)
+![flip](./img/fp.png)
 
 </div>
 <div align=center>
