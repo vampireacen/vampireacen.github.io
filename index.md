@@ -8,7 +8,7 @@
 
 # 前言
 
-本文中所使用 PPT 截图皆来自于导师[b站up主：霹雳吧啦Wz](https://space.bilibili.com/18161609)。
+本文中所使用 PPT 截图皆来自于[b站up主：霹雳吧啦Wz](https://space.bilibili.com/18161609)。
 文中如有不妥地方，欢迎留言指正！
 
 # Transformer主干网络
