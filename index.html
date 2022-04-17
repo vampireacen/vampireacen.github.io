@@ -324,7 +324,7 @@ $[197\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embeddin
 
 </div>
 
-<p>对于普通的<strong>Multi-Head Self Attention</strong>的每一个<strong>token</strong>都会去计算$Q,K,V$，$QK^T$运算完之后再去与&amp;V&amp;联系，每一个<strong>token</strong>都会与所有的<strong>token</strong>去进行沟通。</p>
+<p>对于普通的<strong>Multi-Head Self Attention</strong>的每一个<strong>token</strong>都会去计算$Q,K,V$，$QK^T$运算完之后再去与$V$联系，每一个<strong>token</strong>都会与所有的<strong>token</strong>去进行沟通。</p>
 <p><strong>Window Multi-Head Self Attention</strong> 把特征图进行分块，每个块内部去进行<strong>Self Attention</strong>，这样做的有点是减少了计算量，但是其缺点是只能块内进行沟通，但是块和块之间是无法通信的。</p>
 <div id="SW_MSA"></div>
 

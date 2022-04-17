@@ -292,7 +292,7 @@ $H\times W \times 3$ 的图像经过 **Patch Partition** 和 **Linear Embedding�
 
 </div>
 
-对于普通的**Multi-Head Self Attention**的每一个**token**都会去计算$Q,K,V$，$QK^T$运算完之后再去与&V&联系，每一个**token**都会与所有的**token**去进行沟通。
+对于普通的**Multi-Head Self Attention**的每一个**token**都会去计算$Q,K,V$，$QK^T$运算完之后再去与$V$联系，每一个**token**都会与所有的**token**去进行沟通。
 
 **Window Multi-Head Self Attention** 把特征图进行分块，每个块内部去进行**Self Attention**，这样做的有点是减少了计算量，但是其缺点是只能块内进行沟通，但是块和块之间是无法通信的。
 
