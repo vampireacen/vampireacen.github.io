@@ -233,9 +233,9 @@ $H  W$为<strong>224</strong>的图片 分成 $H  W$为<strong>16</strong> 的<s
 <h3 id="Position Embedding"> Position Embedding &amp; token</h3>
 
 
-对应的每一个patch生成一个<strong>token</strong>，每个<strong>token</strong>都是768维（$[196\times768]$），在所有<strong>token</strong>前面需要<strong>拼接</strong>一个$[1\times768]$可训练的<strong>class token</strong>（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$
+对应的每一个patch生成一个<strong>token</strong>，每个<strong>token</strong>都是768维($[196 \times 768]$），在所有<strong>token</strong>前面需要<strong>拼接</strong>一个$[1\times768]$可训练的<strong>class token</strong>（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$,
 
-$[196\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embedding</strong> <strong>添加</strong> 可训练的位置信息$[196\times768] \longrightarrow [196\times768]$，对于使用1D、2D、相对位置编码效果其实相差很小，但是使用位置编码对比不适用位置编码的效果还是很明显:
+$[197\times768]$ <strong>token</strong> 矩阵再经过<strong>Position Embedding</strong> <strong>添加</strong> 可训练的位置信息$[197\times768] \longrightarrow [197\times768]$，对于使用<strong>1D、2D、相对位置编码</strong>效果其实相差很小，但是使用位置编码对比不适用位置编码的效果还是很明显:
 <div align=center>
 
 <img src="./img/pe.png" alt="Vit">

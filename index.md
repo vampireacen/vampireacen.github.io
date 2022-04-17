@@ -188,9 +188,9 @@ $H  W$为**224**的图片 分成 $H  W$为**16** 的**patches** $\frac{224 \time
 ### Position Embedding & token
 
 
-对应的每一个patch生成一个**token**，每个**token**都是768维（$[196\times768]$），在所有**token**前面需要**拼接**一个$[1\times768]$可训练的**class token**（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$
+对应的每一个patch生成一个**token**，每个**token**都是768维（$[196\times768]$），在所有**token**前面需要**拼接**一个$[1\times768]$可训练的**class token**（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$,
 
-$[196\times768]$ **token** 矩阵再经过**Position Embedding** **添加** 可训练的位置信息$[196\times768] \longrightarrow [196\times768]$，对于使用1D、2D、相对位置编码效果其实相差很小，但是使用位置编码对比不适用位置编码的效果还是很明显:
+$[197\times768]$ **token** 矩阵再经过**Position Embedding** **添加** 可训练的位置信息$[197\times768] \longrightarrow [197\times768]$，对于使用**1D、2D、相对位置编码**效果其实相差很小，但是使用位置编码对比不适用位置编码的效果还是很明显:
 <div align=center>
 
 ![Vit](./img/pe.png)
