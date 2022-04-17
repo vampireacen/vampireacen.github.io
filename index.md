@@ -2624,7 +2624,7 @@ BN与LN的区别在于：
 - LN中同层神经元输入拥有相同的均值和方差，不同的输入样本有不同的均值和方差；
 - BN中则针对不同神经元输入计算均值和方差，同一个batch中的输入拥有相同的均值和方差。
 
-所以，LN 不依赖于 batch 的大小和输入 sequence 的深度，因此可以用于batchsize为1和RNN中对边长的输入sequence的normalize操作。
+所以，LN 不依赖于 batch 的大小和输入 sequence 的深度，因此可以用于batchsize为1和RNN中对变长的输入sequence的normalize操作。
 
 <div align=center>
 
