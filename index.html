@@ -1226,18 +1226,20 @@ $$t_x = (x - x_a) / w_a \:,\: t_y = (y - y_a) / h_a$$
 $$t_w = log(w/w_a) \:,\: t_h = log(h/h_a)$$
 $$t_x^* = (x^* - x_a) / w_a \:,\: t_y^* = (y^* - y_a) / h_a$$
 $$t_w^* = log(w^*/w_a) \:,\: t_h^* = log(h^*/h_a)$$
+
 $$
-  smooth_{L_i}(x) =  \left \{
-  \begin{aligned}
-  0.5x^2  ,\: \:\:\: \:\:if|x|<1\\
-  |x| - 0.5 , \: \:\:otherwise
-  \end{aligned}
-  \right.
-  $$</p>
-  $p_i$ 表示第$i$个anchor预测为目标的概率
-  $p_i^*$ 为正样本时为$1$，负样本时为$0$
-  $t_i$ 表示第$i$个anchor的边界框回归参数
-  $t_i^*$ 表示第$i$个anchor对应的真实 $Ground \:\: Truth \:\: Box$ 的回归参数
+smooth_{L_i}(x) =  \left \{
+\begin{aligned}
+0.5x^2  ,\: \:\:\: \:\:if|x|<1\\
+|x| - 0.5 , \: \:\:otherwise
+\end{aligned}
+\right.
+$$
+
+<p>$p_i$ 表示第$i$个anchor预测为目标的概率</p>
+<p>$p_i^*$ 为正样本时为$1$，负样本时为$0$</p>
+<p>$t_i$ 表示第$i$个anchor的边界框回归参数,$t_i$是通过预测得到的 通过上式还原回特征图的坐标和宽高，$x_a,y_a,w_a,h_a$分别表示对应anchor的$x,y,w,h$</p>
+<p>$t_i^*$ 表示第$i$个anchor对应的真实 $Ground \:\: Truth \:\: Box$ 的回归参数，$t_i^*$是通过GT在原特征图上的坐标和宽高，根据上式计算得到的，用来和$t_i$计算损失，回归边界框</p>
 <div id="swinod"></div>
 
 <h3 id="swin-transformer-object-detection">Swin Transformer Object Detection</h3>
