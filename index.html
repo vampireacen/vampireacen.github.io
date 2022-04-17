@@ -120,7 +120,7 @@
 
 <p><img src="./img/sa2.png" alt="transformer">
 <img src="./img/sa3.png" alt="transformer">
-经过编码后的输入$a1$,$a2$(为了方便描述取两个输入)与$Q,K,V$(可训练)权重矩阵相乘生成对应的$q_1,k_1,v_1$ 与 $q_2,k_2,v_2$,再每一个$q_i$与每一个$k_i$做<strong>点积 (dot product)</strong>，由于transformer全都可以并行化操作所以这里其实就是$QK^T$，然后再比上$\sqrt{d_k}$($d_k$是K的维度)，再经过$softmax$后与$V$进行矩阵乘。</p>
+经过编码后的输入$a1$,$a2$(为了方便描述取两个输入)与$W_Q,W_K,W_V$(可训练)权重矩阵相乘生成对应的$q_1,k_1,v_1$ 与 $q_2,k_2,v_2$,再每一个$q_i$与每一个$k_i$做<strong>点积 (dot product)</strong>，由于transformer全都可以并行化操作所以这里其实就是$QK^T$，然后再比上$\sqrt{d_k}$($d_k$是K的维度)，再经过$softmax$后与$V$进行矩阵乘。</p>
 <p>这里有几个问题：</p>
 <ul>
 <li>$Q1$：$Q,K,V$分别是什么意思？</li>
