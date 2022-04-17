@@ -954,7 +954,7 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 <h3 id="-resnet">对比ResNet</h3>
 </li>
 </ul>
-<p>假设输入为一个图片 $X_0$ , 经过一个L层的神经网络, 其中第i层的非线性变换记为 $H_i(<em>)$ , $H_i(</em>)$ 可以是多种函数操作的累加如 <strong>BN、ReLU、Pooling或Conv</strong> 等. 第 $i$ 层的特征输出记作 $X_i$ .</p>
+<p>假设输入为一个图片 $X_0$ , 经过一个L层的神经网络, 其中第i层的非线性变换记为 $H_i(*)$ , $H_i(*)$ 可以是多种函数操作的累加如 <strong>BN、ReLU、Pooling或Conv</strong> 等. 第 $i$ 层的特征输出记作 $X_i$ .</p>
 <p>传统卷积前馈神经网络将第i层的输出 $X_i$ 作为i+1层的输入,可以写作$X_i = H_i(X_{i- 1})$. 
 <strong>ResNet</strong> 增加了旁路连接,可以写作 $X_l = H_l(X_{l - 1}) + X_{l-1}$.
 <strong>DenseNet</strong> 如上图所示,第 $i$ 层的输入不仅与 $i-1$ 层的输出相关,还有所有之前层的输出有关.记作:$X_l = H_l \: Concat([X_0,X_1,...,X_{i-1}])$ ,既将 $X_0$ 到 $X_1$ 层的所有输出 <strong>feature map</strong>按<strong>Channel</strong> 组合在一起.这里所用到的非线性变换H为$BN+ReLU+ Conv(3×3)$的组合</p>
@@ -1187,6 +1187,16 @@ $$ \frac{\partial loss}{\partial x_L} = \frac{\partial loss}{\partial x_L} \cdot
 </div>
 
 <p>上面所说的k一般是值 $9$，即每个 <strong>anchor</strong> 都有三种不同的面积${128^2,256^2,512^2}$，每个面积都有三种不同的尺度${1:1,1:2,2:1}$，</p>
+<div align=center>
+
+<img src="./img/rpn_sample_1.png" alt="swin">
+
+</div>
+<div align=center>
+
+<img src="./img/rpn_sample_2.png" alt="swin">
+
+</div>
 <div align=center>
 
 <img src="./img/rpn_sample.png" alt="swin">

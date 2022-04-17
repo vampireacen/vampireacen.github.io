@@ -1261,6 +1261,18 @@ $$Faster RCNN = PRN + Fast RCNN$$
 
 <div align=center>
 
+![swin](./img/rpn_sample_1.png)
+
+</div>
+
+<div align=center>
+
+![swin](./img/rpn_sample_2.png)
+
+</div>
+
+<div align=center>
+
 ![swin](./img/rpn_sample.png)
 
 </div>
