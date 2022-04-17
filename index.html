@@ -146,7 +146,7 @@
 <p>问题：</p>
 <ul>
 <li>$Q$: 为什么需要<strong>multi head</strong>呢，只用一个head不行吗？</li>
-<li>$A$: 每个<strong>head</strong>空间中注意到的东西可能都不一样，比如<strong>head</strong>注意到的东西<strong>head</strong>没注意到，<strong>head</strong>注意到的事情<strong>head</strong>没注意到，所以把所有<strong>head</strong>的结果$Concat$相当于注意的更加全面。</li>
+<li>$A$: 每个<strong>head</strong>空间中注意到的东西可能都不一样，比如<strong>head1</strong>注意到的东西<strong>head2</strong>没注意到，<strong>head2</strong>注意到的事情<strong>head3</strong>没注意到，所以把所有<strong>head</strong>的结果$Concat$相当于注意的更加全面。</li>
 </ul>
 <h4 id="add-norm">Add &amp; Norm</h4>
 <p><strong>Add</strong> 指残差结构，把<strong>multi-head self attention</strong>的输入与其输出做一个相加，因为<strong>multi-head</strong>后的结果经过了一个线性变换使得输入输出是相同的维度，所以可以相加。</p>
