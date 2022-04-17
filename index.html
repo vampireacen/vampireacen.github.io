@@ -220,7 +220,7 @@
 
 <div id="patch_linear">
 
-  <h3 id="Patches">### Patches &amp; Linear Projection of Flattened Patches</h3>>
+<h3 id="Patches"> Patches &amp; Linear Projection of Flattened Patches</h3>
 
 
 由于<strong>标准的transformer模块</strong>要求输入的是一个<strong>token</strong>序列，而一张图片并不是一个序列，把图像分块（<strong>patches</strong>），由块来组成序列，对于$2D$图像$x\in \mathbb{R}^{H×W×C}$将其分为$P \times P$的 <strong>patches</strong>，$x_p\in \mathbb{R}^{N\times(P^2\cdot C)}$，共分成N个，$N = HW/P^2$，最终获得$N$个 $P^2 \cdot C$特征大小的向量(<strong>768</strong>)。在代码实现中直接用一个卷积层来实现的，以为<strong>Vit-B 16</strong>为例，使用卷积核<strong>kernal size</strong>为$16 \times 16$，<strong>stride</strong>为$16$，卷积核个数为$768$来实现，以$224 \times 224 \times 3$($H  W$为224，的$RGB$ $3 channel$)为例：
@@ -230,7 +230,7 @@ $H  W$为<strong>224</strong>的图片 分成 $H  W$为<strong>16</strong> 的<s
 
 <div id="pe_token">
 
-### Position Embedding &amp; token
+<h3 id="Position Embedding"> Position Embedding &amp; token</h3>
 
 
 对应的每一个patch生成一个<strong>token</strong>，每个<strong>token</strong>都是768维（$[196\times768]$），在所有<strong>token</strong>前面需要<strong>拼接</strong>一个$[1\times768]$可训练的<strong>class token</strong>（该图片所对应的类别）：$Concat([1 \times 768],[196\times768]) \longrightarrow [197\times768]$
