@@ -2970,6 +2970,38 @@ $m_t$ 为一阶动量，$v_t$ 为二阶动量，$\beta_1（0.9）$,$\beta_2（0.
 * ***异常检测，把分类问题修改为异常检测问题***
 * ***迁移学习***
 
+## Tensor RT的加速原理
+
+在计算资源并不丰富的嵌入式设备上，TensorRT之所以能加速神经网络的的推断主要得益于两点。首先是TensorRT支持INT8和FP16的计算，通过在减少计算量和保持精度之间达到一个理想的trade-off，达到加速推断的目的。
+
+更为重要的是TensorRT对于网络结构进行了重构和优化，主要体现在一下几个方面。
+
+- 第一是tensorRT通过解析网络模型将网络中无用的输出层消除以减小计算。
+
+- 第二是对于网络结构的垂直整合，即将目前主流神经网络的conv、BN、Relu三个层融合为了一个层，例如将图1所示的常见的Inception结构重构为图2所示的网络结构。
+
+- 第三是对于网络的水平组合，水平组合是指将输入为相同张量和执行相同操作的层融合一起，如图2向图3的转化。
+
+- 第四是对于concat层，将contact层的输入直接送入下面的操作中，不用单独进行concat后在输入计算，相当于减少了一次传输吞吐。
+
+<div align=center>
+
+![tensorrt](./img/tensorrt1.png)
+
+</div>
+
+<div align=center>
+
+![tensorrt](./img/tensorrt2.png)
+
+</div>
+
+<div align=center>
+
+![tensorrt](./img/tensorrt3.png)
+
+</div>
+
 ## Attention
 
 [Attention 和 fc 的 区别](https://www.zhihu.com/question/320174043)
