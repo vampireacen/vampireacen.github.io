@@ -460,3 +460,24 @@ SELECT * FROM person ORDER BY math desc;
 - 1NF:要求数据库表的每一列都是不可分割的原子数据项
 - 2NF:在1NF的基础上，确保表中的每列都和主键相关，属性完全依赖于主键；
 - 3NF:确保每列都和主键列直接相关，而不是间接相关；属性不依赖于非主属性，直接依赖于主属性（数据不能存在传递关系，a-->b-->c）
+
+## linux常用指令
+- ls
+- cd
+- pwd
+- mv
+- rm
+- cp
+- cat
+- vim/vi
+- source
+- grep
+- find
+- where
+- ps
+- top
+- netstat
+- conda
+- kill
+- mkdir
+- sudo
